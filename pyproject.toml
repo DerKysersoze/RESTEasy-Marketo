@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+# Make `marketo_util` importable when pytest runs as a console script
+# (no CWD on sys.path), e.g. in CI:  pythonpath = ["."]
+pythonpath = ["."]

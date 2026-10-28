@@ -17,9 +17,9 @@ A local utility that makes the Marketo Engage REST API usable by **non-technical
   bulk job lifecycle (create → enqueue → poll → download), error translation.
 
 **Non-goals (v1):**
-- ❌ Marketo **reporting** — reports are NOT exposed by the REST API (only SOAP/CSV-from-UI).
+- ❌ Marketo **reporting** — reports are NOT exposed by the REST API (only CSV-from-UI export).
   Note this in-app so users know why "my report" isn't a call they can make.
-- ❌ SOAP API, webhooks, Flow Triggers API, Marketo Engage bulk *SOAP* import.
+- ❌ Webhooks, Flow Triggers API.
 - ❌ Multi-tenant/multi-instance switching (config supports one instance at a time;
   a second config can be added later).
 

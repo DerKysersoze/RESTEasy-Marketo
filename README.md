@@ -8,7 +8,7 @@ as pretty JSON or CSV — no JSON crafting, no token juggling.
 
 > **Reporting is not available via the Marketo REST API.** This tool covers
 > leads, activities, assets, programs, opportunities, and bulk data. For
-> reports, use the Marketo UI export or the SOAP reporting API.
+> reports, use the Marketo UI export.
 
 ## Screenshots
 
