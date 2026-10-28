@@ -58,8 +58,16 @@ jobs:
           pip install -r requirements.txt pyinstaller
       - name: Build
         run: pyinstaller MarketoRESTEasy.spec --noconfirm
+      - name: Show dist/ contents
+        run: ls -la dist/
       - name: Ad-hoc code sign (no Developer ID required)
-        run: codesign --force --deep --sign - "dist/Marketo RESTEasy.app"
+        run: |
+          if [ ! -d "dist/Marketo RESTEasy.app" ]; then
+            echo "Expected 'dist/Marketo RESTEasy.app' — actual contents of dist/:" >&2
+            ls -laR dist/ >&2
+            exit 1
+          fi
+          codesign --force --deep --sign - "dist/Marketo RESTEasy.app"
       - name: Package
         run: ditto -c -k --sequesterRsrc --keepParent "dist/Marketo RESTEasy.app" MarketoRESTEasy-macos-arm64.zip
       - uses: actions/upload-artifact@v4

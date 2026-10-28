@@ -101,9 +101,11 @@ else:
         upx=False,
         name="MarketoRESTEasy",
     )
+    # NOTE: the name must include the .app extension — PyInstaller does not
+    # append it (building/osx.py uses the name verbatim as the dist folder).
     app = BUNDLE(
         coll,
-        name="Marketo RESTEasy",
+        name="Marketo RESTEasy.app",
         icon="packaging/icon.icns",
         bundle_identifier="com.marketo.resteasy",
         version="0.1.0",
