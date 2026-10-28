@@ -7,13 +7,31 @@ Env:    MARKETO_UTIL_HOST (default 127.0.0.1)
         MARKETO_UTIL_NO_BROWSER=1 to skip opening the browser
 """
 import os
+import sys
 import threading
 import webbrowser
 
 import uvicorn
 
 
+def _attach_log_file() -> None:
+    """The packaged app has no console window; route stdout/stderr to a file
+    (app-data dir / marketo-utility.log) so a failed startup can be diagnosed.
+    Never blocks startup if logging can't be set up."""
+    if not getattr(sys, "frozen", False):
+        return
+    try:
+        from marketo_util.db import app_data_dir
+
+        stream = open(app_data_dir() / "marketo-utility.log", "a", buffering=1, encoding="utf-8")
+    except Exception:
+        return
+    sys.stdout = stream
+    sys.stderr = stream
+
+
 def main() -> None:
+    _attach_log_file()
     host = os.environ.get("MARKETO_UTIL_HOST", "127.0.0.1")
     port = int(os.environ.get("MARKETO_UTIL_PORT", "8787"))
     if os.environ.get("MARKETO_UTIL_NO_BROWSER") != "1":

@@ -1,0 +1,85 @@
+name: Build & Release
+
+on:
+  workflow_dispatch:          # manual: "Run workflow" button on GitHub
+  push:
+    tags:
+      - "v*"                  # tagging v0.2.0 etc. builds + publishes a release
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest -q
+
+  build-windows:
+    name: Windows x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+      - name: Build
+        shell: pwsh
+        run: pyinstaller MarketoRESTEasy.spec --noconfirm
+      - name: Package
+        shell: pwsh
+        run: Compress-Archive -Path dist/MarketoRESTEasy.exe -DestinationPath MarketoRESTEasy-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MarketoRESTEasy-windows-x64
+          path: MarketoRESTEasy-windows-x64.zip
+
+  build-macos:
+    name: macOS (Apple Silicon)
+    runs-on: macos-latest     # arm64 runner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+      - name: Build
+        run: pyinstaller MarketoRESTEasy.spec --noconfirm
+      - name: Ad-hoc code sign (no Developer ID required)
+        run: codesign --force --deep --sign - "dist/Marketo RESTEasy.app"
+      - name: Package
+        run: ditto -c -k --sequesterRsrc --keepParent "dist/Marketo RESTEasy.app" MarketoRESTEasy-macos-arm64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MarketoRESTEasy-macos-arm64
+          path: MarketoRESTEasy-macos-arm64.zip
+
+  release:
+    name: Publish release
+    needs: [test, build-windows, build-macos]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            MarketoRESTEasy-windows-x64.zip
+            MarketoRESTEasy-macos-arm64.zip

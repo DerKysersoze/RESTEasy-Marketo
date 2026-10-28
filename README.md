@@ -8,7 +8,34 @@ as pretty JSON or CSV — no JSON crafting, no token juggling.
 > leads, activities, assets, programs, opportunities, and bulk data. For
 > reports, use the Marketo UI export or the SOAP reporting API.
 
-## Quick start
+## Download & run (no Python needed)
+
+Get the latest build from the [Releases page](../../releases/latest):
+
+| OS | File | How to run |
+|---|---|---|
+| Windows 10/11 (x64) | `MarketoRESTEasy-windows-x64.zip` | Unzip, double-click `MarketoRESTEasy.exe` |
+| macOS 11+ (Apple Silicon) | `MarketoRESTEasy-macos-arm64.zip` | Unzip, put `Marketo RESTEasy.app` in Applications, open it |
+
+On first launch the app starts locally and opens `http://127.0.0.1:8787`
+in your browser automatically. No installation, no Python, no configuration
+file — everything is self-contained.
+
+**First-run notes**
+
+- **Windows:** SmartScreen may show *“Windows protected your PC”* because the
+  app isn't code-signed. Click **More info → Run**. This is normal for a
+  locally built app; nothing is downloaded or phoned home except your own
+  Marketo instance.
+- **macOS:** Gatekeeper may say the developer can't be verified (the app is
+  ad-hoc signed, not notarized). **Control-click (right-click) the app →
+  Open → Open** once, and it will open normally afterwards.
+
+After that, follow the steps below (starting at *Manage connections*).
+
+## Run from source (developers)
+
+### Quick start
 
 **Windows**
 
@@ -134,3 +161,42 @@ docs, and a **View in Marketo docs** link. The reference table lives in
 ```bat
 pytest -q
 ```
+
+## Building the desktop app
+
+The distributable builds (single `MarketoRESTEasy.exe` on Windows,
+`Marketo RESTEasy.app` on macOS) come from [MarketoRESTEasy.spec](MarketoRESTEasy.spec)
+via PyInstaller. One spec file builds both OSes — build on the OS you target
+(PyInstaller doesn't cross-compile):
+
+```bat
+:: Windows (in a clean venv with the app deps)
+python -m venv .venv-pkg
+.venv-pkg\Scripts\pip install -r requirements.txt pyinstaller
+.venv-pkg\Scripts\pyinstaller MarketoRESTEasy.spec --noconfirm
+:: -> dist\MarketoRESTEasy.exe
+```
+
+```sh
+# macOS
+python3 -m venv .venv-pkg
+.venv-pkg/bin/pip install -r requirements.txt pyinstaller
+.venv-pkg/bin/pyinstaller MarketoRESTEasy.spec --noconfirm
+codesign --force --deep --sign - "dist/Marketo RESTEasy.app"   # ad-hoc sign
+# -> dist/Marketo RESTEasy.app
+```
+
+GitHub Actions does exactly this for both platforms (`.github/workflows/build.yml`):
+run it manually from the **Actions** tab, or push a `v*` tag to publish a
+Release with both zips.
+
+Packaging notes:
+
+- The app is imported by uvicorn from the string `"marketo_util.app:app"`,
+  so the spec must keep `collect_submodules("marketo_util")` in `hiddenimports`.
+- `catalog/` and `marketo_util/static/` are bundled as data at the exact
+  relative paths the code expects (`catalog.py` / `app.py` resolve them from
+  `__file__`).
+- The packaged app has no console window; `run.py` redirects startup logs to
+  `<app-data>/marketo-utility.log` when running frozen.
+- Icons live in `packaging/` (`.ico` for Windows, `.icns` for macOS).
