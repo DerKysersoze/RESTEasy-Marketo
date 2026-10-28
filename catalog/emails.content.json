@@ -1,0 +1,51 @@
+{
+  "id": "emails.content",
+  "name": "Get Email Content Sections",
+  "group": "Emails",
+  "summary": "Lists the email's editable content sections (subject, header, body blocks, \u2026).",
+  "whenToUse": "When you want to see the sections an email is built from (each has an htmlId).",
+  "method": "GET",
+  "path": "/rest/asset/v1/email/{id}/content.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Email ID",
+        "required": true,
+        "type": "integer",
+        "example": "1356"
+      }
+    ],
+    "query": [
+      {
+        "name": "status",
+        "label": "Version",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "approved",
+            "label": "Approved"
+          },
+          {
+            "value": "draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "Auto (default)",
+        "hint": "Return the sections from the approved or draft version."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "The email's editable sections: htmlId, type, content, \u2026"
+  },
+  "notes": [
+    "The htmlId of each section is what the section-update endpoints need."
+  ]
+}

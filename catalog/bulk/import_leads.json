@@ -1,0 +1,70 @@
+{
+  "id": "bulk.import_leads",
+  "name": "Import leads (bulk)",
+  "group": "Bulk Import",
+  "kind": "import",
+  "summary": "Import a large CSV/TSV/SSV file of lead records (insert or update). Upload the file, watch the job, then open the failures/warnings file if any rows had problems.",
+  "whenToUse": "Loading or updating many leads at once. For one-off small updates use 'Sync leads' instead. The first row must be a header of REST API field names (e.g. email,firstName,lastName).",
+  "permission": "Write-Only Lead (or higher)",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/bulk-import/bulk-lead-import",
+  "notes": [
+    "File must be under 10 MB and start with a header row of REST API names.",
+    "Records are matched/updated by the dedupe field (default: email). Use lookupField 'id' to only update existing leads.",
+    "Optional: imported leads can be added to a static list (listId).",
+    "The job runs asynchronously; check back in a few seconds/minutes.",
+    "After completion, open 'Failures' and/or 'Warnings' to see exactly which rows had issues and why.",
+    "batchId is valid for 7 days."
+  ],
+  "create": {
+    "method": "POST",
+    "path": "/bulk/v1/leads.json",
+    "multipart": true
+  },
+  "status": { "method": "GET", "path": "/bulk/v1/leads/batch/{jobId}.json" },
+  "failures": { "method": "GET", "path": "/bulk/v1/leads/batch/{jobId}/failures.json" },
+  "warnings": { "method": "GET", "path": "/bulk/v1/leads/batch/{jobId}/warnings.json" },
+  "resultId": "batchId",
+  "form": [
+    {
+      "name": "file",
+      "label": "Lead data file",
+      "type": "file",
+      "required": true,
+      "hint": "CSV/TSV/SSV under 10 MB. First row = REST API field names (email,firstName,lastName, …)."
+    },
+    {
+      "name": "format",
+      "label": "File format",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "csv", "label": "CSV — comma-separated" },
+        { "value": "tsv", "label": "TSV — tab-separated" },
+        { "value": "ssv", "label": "SSV — semicolon-separated" }
+      ]
+    },
+    {
+      "name": "lookupField",
+      "label": "Match/update by field",
+      "type": "select",
+      "placeholder": "email (default — insert or update)",
+      "options": [
+        { "value": "email", "label": "email — insert or update by email" },
+        { "value": "id", "label": "id — update only (must already exist)" }
+      ],
+      "hint": "Leave as email to create new leads or update existing ones."
+    },
+    {
+      "name": "listId",
+      "label": "Also add to a static list (optional)",
+      "type": "integer",
+      "hint": "Static list ID — imported leads are added to this list in addition to being created/updated."
+    },
+    {
+      "name": "partitionName",
+      "label": "Partition (optional, advanced)",
+      "type": "string",
+      "hint": "Only for workspace setups — the partition to import into (see 'List partitions' in the Leads group)."
+    }
+  ]
+}

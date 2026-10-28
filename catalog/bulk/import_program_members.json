@@ -1,0 +1,61 @@
+{
+  "id": "bulk.import_program_members",
+  "name": "Import program members (bulk)",
+  "group": "Bulk Import",
+  "kind": "import",
+  "summary": "Import a large CSV/TSV/SSV file of program member records into a specific program with a specific status (insert or update). Every row must include an email.",
+  "whenToUse": "Adding/refreshing many program members at once. For a few leads use 'Add to List' or 'Set program member status' instead. The first row must be a header of REST API names.",
+  "permission": "Read-Write Program (or higher)",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/bulk-import/bulk-program-member-import",
+  "notes": [
+    "File must be under 10 MB and start with a header row of REST API names.",
+    "Every row must include the email field — it is used to match leads.",
+    "The status you choose must already exist on the program (e.g. 'On List', 'Influenced', 'Completed').",
+    "The job runs asynchronously; check back in a few seconds/minutes.",
+    "After completion, open 'Failures' and/or 'Warnings' to see exactly which rows had issues and why.",
+    "batchId is valid for 7 days."
+  ],
+  "create": {
+    "method": "POST",
+    "path": "/bulk/v1/program/{programId}/members/import.json",
+    "multipart": true
+  },
+  "status": { "method": "GET", "path": "/bulk/v1/program/members/import/{jobId}/status.json" },
+  "failures": { "method": "GET", "path": "/bulk/v1/program/members/import/{jobId}/failures.json" },
+  "warnings": { "method": "GET", "path": "/bulk/v1/program/members/import/{jobId}/warnings.json" },
+  "resultId": "batchId",
+  "form": [
+    {
+      "name": "programId",
+      "label": "Program ID",
+      "type": "integer",
+      "required": true,
+      "hint": "Find it in the 'Programs' group (List programs)."
+    },
+    {
+      "name": "programMemberStatus",
+      "label": "Program status to set",
+      "type": "string",
+      "required": true,
+      "hint": "Must be a status that exists on this program, e.g. 'On List', 'Influenced', 'Completed'."
+    },
+    {
+      "name": "file",
+      "label": "Member data file",
+      "type": "file",
+      "required": true,
+      "hint": "CSV/TSV/SSV under 10 MB. First row = REST API names; must include email."
+    },
+    {
+      "name": "format",
+      "label": "File format",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "csv", "label": "CSV — comma-separated" },
+        { "value": "tsv", "label": "TSV — tab-separated" },
+        { "value": "ssv", "label": "SSV — semicolon-separated" }
+      ]
+    }
+  ]
+}

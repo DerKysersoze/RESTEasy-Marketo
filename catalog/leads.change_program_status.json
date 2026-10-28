@@ -1,0 +1,39 @@
+{
+  "id": "leads.change_program_status",
+  "name": "Change Status (existing members only)",
+  "group": "Leads",
+  "summary": "Changes the program status of leads that are ALREADY members of the program. Leads not in the program are not added.",
+  "whenToUse": "For nudging existing members forward in a program. If you also want to ADD leads to the program, use Programs → Set Program Member Status instead.",
+  "method": "POST",
+  "path": "/rest/v1/leads/programs/{programId}/status.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Programs → Get Programs.",
+        "example": "1097"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "freeform",
+      "example": "{\n  \"status\": \"Member\",\n  \"input\": [\n    { \"id\": 123456 },\n    { \"id\": 777888 }\n  ]\n}",
+      "hint": "status = the program's status name (e.g. Member, Influenced, Completed — depends on the program's channel). input = the lead IDs to change."
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Status per lead."
+  },
+  "notes": [
+    "Only existing program members may be changed with this call — new members are ignored.",
+    "The status name must exist on the program (check the program's channel settings in the Marketo UI).",
+    "Body shape follows Marketo's sample API clients; if Marketo rejects it, the upsert call 'Set Program Member Status' is the safer choice."
+  ]
+}

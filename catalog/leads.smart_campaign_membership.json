@@ -1,0 +1,39 @@
+{
+  "id": "leads.smart_campaign_membership",
+  "name": "Get Smart Campaigns by Lead ID",
+  "group": "Leads",
+  "summary": "Shows every Smart Campaign that a specific lead is enrolled in.",
+  "whenToUse": "When you want to check which Smart Campaigns a lead is currently in (or was routed into).",
+  "method": "GET",
+  "path": "/rest/v1/leads/{id}/smartCampaignMembership.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Lead ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The lead's numeric Marketo ID.",
+        "example": "123456"
+      }
+    ],
+    "query": [
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Maximum records per response (max 300). Leave blank for the default."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of Smart Campaign memberships: campaignId and enrollment details."
+  },
+  "notes": []
+}

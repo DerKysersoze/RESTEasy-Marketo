@@ -1,0 +1,21 @@
+{
+  "id": "customobjects.list",
+  "name": "List Custom Objects",
+  "group": "Custom Objects",
+  "summary": "Lists every custom object type in your instance (up to 10 types) with its key fields and relationships to leads.",
+  "whenToUse": "The starting point for custom objects — find the object's API name before describing, querying, or syncing it.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Only Custom Object",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "One entry per object type: name, idField, dedupeFields, searchableFields, and relationships (e.g. which lead field links to it)."
+  },
+  "notes": [
+    "Custom objects store extra per-lead data (e.g. cars owned, courses taken) beyond the standard lead fields.",
+    "The dedupeFields value (e.g. vin) is what you'll use to match records in Sync/Delete calls."
+  ]
+}

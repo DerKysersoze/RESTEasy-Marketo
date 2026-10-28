@@ -1,0 +1,44 @@
+{
+  "id": "lists.add",
+  "name": "Add Leads to List",
+  "group": "Static Lists",
+  "summary": "Adds one or more leads to a static list (up to 300 IDs per call). Leads not found are skipped with a reason.",
+  "whenToUse": "When you want to enroll specific people in a static list — e.g. a manual campaign audience or an exclusion list.",
+  "method": "POST",
+  "path": "/rest/v1/lists/{listId}/leads.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/list-membership",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [
+      {
+        "name": "listId",
+        "label": "List ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Static Lists.",
+        "example": "87"
+      }
+    ],
+    "query": [
+      {
+        "name": "id",
+        "label": "Lead ID(s)",
+        "required": true,
+        "type": "csv",
+        "repeat": true,
+        "hint": "Comma-separated lead IDs to add. Max 300 per call.",
+        "example": "318594, 318595"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "One status per lead ID: added/updated or skipped with a reason."
+  },
+  "notes": [
+    "Adding a lead that's already on the list is harmless — it just stays on the list.",
+    "This is a static list, so the membership won't change on its own (unlike Smart Lists)."
+  ]
+}

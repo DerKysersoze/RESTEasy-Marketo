@@ -1,0 +1,71 @@
+{
+  "id": "customobjects.query",
+  "name": "Query Custom Object Records",
+  "group": "Custom Objects",
+  "summary": "Fetches records of a custom object by a key field (usually the dedupe field or marketoGUID), with optional field selection and paging.",
+  "whenToUse": "When you want to read the custom data attached to people — e.g. all 'car' records, or the ones for specific VINs.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects/{apiName}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Only Custom Object",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Object API name",
+        "required": true,
+        "type": "string",
+        "hint": "The object type's API name — find it via List Custom Objects.",
+        "example": "car"
+      }
+    ],
+    "query": [
+      {
+        "name": "filterType",
+        "label": "Filter on",
+        "required": true,
+        "type": "string",
+        "hint": "A key field of this object — check Describe Custom Object for searchableFields (e.g. the dedupe field like vin, or marketoGUID).",
+        "example": "vin"
+      },
+      {
+        "name": "filterValues",
+        "label": "Filter value(s)",
+        "required": true,
+        "type": "csv",
+        "hint": "Comma-separated key values. Max 300.",
+        "example": "1H4FD1HS5AD123456"
+      },
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "string",
+        "hint": "Optional comma-separated field API names."
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Max 300."
+      },
+      {
+        "name": "nextPageToken",
+        "label": "Next page token",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Copy nextPageToken from the previous response to continue."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "The object's records with the requested fields."
+  },
+  "notes": [
+    "The filter field must be one of the object's searchable/key fields — see Describe Custom Object."
+  ]
+}

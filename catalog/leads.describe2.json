@@ -1,0 +1,20 @@
+{
+  "id": "leads.describe2",
+  "name": "Describe Leads2",
+  "group": "Leads",
+  "summary": "Lists the lead fields that can be used to filter/search leads (for 'Get Leads by Filter Type'), with the allowed filter types for each.",
+  "whenToUse": "Use this to learn which field to put in the 'Filter on' field of Get Leads by Filter Type — it shows every searchable field and its type.",
+  "method": "GET",
+  "path": "/rest/v1/leads/describe2.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of searchable field definitions: REST name, data type, and allowed filter types."
+  },
+  "notes": [
+    "Companion to 'Describe Leads' — that one lists all fields; this one lists which are searchable/filterable."
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "id": "emails.send_sample",
+  "name": "Send Sample Email",
+  "group": "Emails",
+  "summary": "Sends the email as a real sample to a mailbox you specify.",
+  "whenToUse": "When you want a real-world test of the email in an inbox (desktop and mobile clients).",
+  "method": "POST",
+  "path": "/rest/asset/v1/email/{id}/sendSample.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Write Asset",
+  "confirm": "This sends a real email to the address entered above. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Email ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Emails.",
+        "example": "1356"
+      }
+    ],
+    "query": [
+      {
+        "name": "emailAddress",
+        "label": "Recipient",
+        "required": true,
+        "type": "string",
+        "hint": "Where the sample will be delivered.",
+        "example": "you@company.com"
+      },
+      {
+        "name": "leadId",
+        "label": "Impersonate lead ID",
+        "required": false,
+        "type": "integer",
+        "hint": "Personalize the sample with this lead's data.",
+        "example": "1001"
+      },
+      {
+        "name": "textOnly",
+        "label": "Text version only",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "true",
+            "label": "Yes \u2014 text only"
+          }
+        ],
+        "placeholder": "HTML (default)"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Confirmation with the sample's ID."
+  },
+  "notes": [
+    "The sample lands in the recipient's real inbox \u2014 use a mailbox you actually check."
+  ]
+}

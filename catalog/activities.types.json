@@ -1,0 +1,18 @@
+{
+  "id": "activities.types",
+  "name": "Get Activity Types",
+  "group": "Activities",
+  "summary": "Lists every activity type in your instance with its ID — the IDs you need to filter activities (e.g. only 'Web Page Views', only 'Data Value Changes').",
+  "whenToUse": "Run this first when working with activities: it gives you the type IDs to pass to 'Get Lead Activities'.",
+  "method": "GET",
+  "path": "/rest/v1/activities/types.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/activities",
+  "permission": "Read-Only Activity",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of activity types: id, name, and definitions (primary attribute, etc.)."
+  },
+  "notes": []
+}

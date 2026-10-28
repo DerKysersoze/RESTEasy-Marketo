@@ -1,0 +1,63 @@
+{
+  "id": "smartlists.list",
+  "name": "List Smart Lists",
+  "group": "Lists & Campaigns",
+  "summary": "Browses the smart lists in your Marketo instance \u2014 name, folder, status.",
+  "whenToUse": "When you need to find a smart list's ID or see which lists exist.",
+  "method": "GET",
+  "path": "/rest/asset/v1/smartLists.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-lists",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "folder",
+        "label": "Folder",
+        "required": false,
+        "type": "json",
+        "example": "{\"id\":31,\"type\":\"Folder\"}",
+        "hint": "Limit to one folder (JSON object with id and type)."
+      },
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "How many lists to return (with offset to page).",
+        "example": "50"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging. Default 0.",
+        "example": "20"
+      },
+      {
+        "name": "earliestUpdatedAt",
+        "label": "Updated after",
+        "required": false,
+        "type": "datetime",
+        "hint": "ISO-8601, e.g. 2026-09-01T00:00:00"
+      },
+      {
+        "name": "latestUpdatedAt",
+        "label": "Updated before",
+        "required": false,
+        "type": "datetime",
+        "hint": "ISO-8601, e.g. 2026-10-01T00:00:00"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Smart list records: id, name, folder, status, \u2026"
+  },
+  "notes": [
+    "Smart lists hold the trigger/filter definitions that drive smart campaigns."
+  ]
+}

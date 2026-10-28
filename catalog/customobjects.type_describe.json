@@ -1,0 +1,44 @@
+{
+  "id": "customobjects.type_describe",
+  "name": "Describe Custom Object Type",
+  "group": "Custom Objects",
+  "summary": "Shows one custom object type's full schema: its fields, key fields, and relationships — with version state.",
+  "whenToUse": "When you need the complete field list of a type before adding fields or building data for it.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects/schema/{apiName}/describe.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Type API name",
+        "required": true,
+        "type": "string",
+        "hint": "The type's API name — find it via List Custom Object Types.",
+        "example": "car"
+      }
+    ],
+    "query": [
+      {
+        "name": "state",
+        "label": "Version state",
+        "required": false,
+        "type": "select",
+        "placeholder": "Approved (if one exists), else draft",
+        "options": [
+          { "value": "draft", "label": "Draft version" },
+          { "value": "approved", "label": "Approved version" },
+          { "value": "approvedWithDraft", "label": "Approved, plus draft if there is one" }
+        ]
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Type metadata plus its standard fields (marketoGUID, createdAt, updatedAt) and custom fields."
+  },
+  "notes": []
+}

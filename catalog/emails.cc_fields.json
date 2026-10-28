@@ -1,0 +1,22 @@
+{
+  "id": "emails.cc_fields",
+  "name": "List Email CC Fields",
+  "group": "Emails",
+  "summary": "Lists the lead fields enabled for email CC on this instance.",
+  "whenToUse": "When you want to know which fields can be used to CC people on emails.",
+  "method": "GET",
+  "path": "/rest/asset/v1/email/ccFields.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Fields available for email CC: attribute ID, object name, display name."
+  },
+  "notes": []
+}

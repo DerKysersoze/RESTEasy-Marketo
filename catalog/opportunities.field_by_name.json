@@ -1,0 +1,31 @@
+{
+  "id": "opportunities.field_by_name",
+  "name": "Get Opportunity Field by Name",
+  "group": "Opportunities",
+  "summary": "Fetches full metadata for one Opportunity field by its API name.",
+  "whenToUse": "When you need details on a single field (data type, length, whether it's custom).",
+  "method": "GET",
+  "path": "/rest/v1/opportunities/schema/fields/{fieldApiName}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/opportunities",
+  "permission": "Read-Write Schema Custom Field",
+  "params": {
+    "path": [
+      {
+        "name": "fieldApiName",
+        "label": "Field API name",
+        "required": true,
+        "type": "string",
+        "hint": "The field's API name — find it via Get Opportunity Fields.",
+        "example": "externalOpportunityId"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The field's metadata."
+  },
+  "notes": []
+}

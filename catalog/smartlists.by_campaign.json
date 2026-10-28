@@ -1,0 +1,45 @@
+{
+  "id": "smartlists.by_campaign",
+  "name": "Get Smart Campaign's Smart List",
+  "group": "Lists & Campaigns",
+  "summary": "Fetches the smart list behind a smart campaign (its triggers and filters).",
+  "whenToUse": "When you want to see what triggers a smart campaign.",
+  "method": "GET",
+  "path": "/rest/asset/v1/smartCampaign/{smartCampaignId}/smartList.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-lists",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "smartCampaignId",
+        "label": "Smart Campaign ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The campaign's ID (from List Smart Campaigns).",
+        "example": "1069"
+      }
+    ],
+    "query": [
+      {
+        "name": "includeRules",
+        "label": "Include rules",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "true",
+            "label": "Yes \u2014 include the list's rules"
+          }
+        ],
+        "placeholder": "No (default)"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The campaign's smart list record."
+  },
+  "notes": []
+}

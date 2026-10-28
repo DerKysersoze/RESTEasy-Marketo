@@ -1,0 +1,80 @@
+{
+  "id": "emails.list",
+  "name": "List Emails",
+  "group": "Emails",
+  "summary": "Browses the email assets in your Marketo instance \u2014 name, subject, status, folder.",
+  "whenToUse": "When you need to find an email's ID or see which emails exist (and their approval status).",
+  "method": "GET",
+  "path": "/rest/asset/v1/emails.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "status",
+        "label": "Status",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "Approved",
+            "label": "Approved"
+          },
+          {
+            "value": "Draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "All (no filter)"
+      },
+      {
+        "name": "folder",
+        "label": "Folder",
+        "required": false,
+        "type": "json",
+        "example": "{\"id\":341,\"type\":\"Folder\"}",
+        "hint": "Limit to one folder \u2014 a JSON object with id and type (Folder or Program)."
+      },
+      {
+        "name": "earliestUpdatedAt",
+        "label": "Updated after",
+        "required": false,
+        "type": "datetime",
+        "hint": "ISO-8601, e.g. 2026-09-01T00:00:00"
+      },
+      {
+        "name": "latestUpdatedAt",
+        "label": "Updated before",
+        "required": false,
+        "type": "datetime",
+        "hint": "ISO-8601, e.g. 2026-10-01T00:00:00"
+      },
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "Default 20, maximum 200.",
+        "example": "50"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging. Default 0.",
+        "example": "20"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Email records: id, name, subject, from/reply addresses, folder, status, template, \u2026"
+  },
+  "notes": [
+    "The list omits each email's editable content \u2014 use 'Get Email Content Sections' for that."
+  ]
+}

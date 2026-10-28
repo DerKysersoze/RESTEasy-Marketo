@@ -1,0 +1,65 @@
+{
+  "id": "leads.push",
+  "name": "Push Lead (upsert + activity)",
+  "group": "Leads",
+  "summary": "Like Sync Leads, but also writes a triggerable activity attributed to a program — the way to start workflows from a lead capture event.",
+  "whenToUse": "When you want to add/update a lead AND kick off a Smart Campaign or program flow at the same time (e.g. 'downloaded the pricing sheet').",
+  "method": "POST",
+  "path": "/rest/v1/leads/push.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": {
+      "mode": "sync",
+      "wrapper": "input",
+      "fieldPicker": "describe",
+      "maxPerCall": 300,
+      "fixed": [
+        {
+          "name": "programName",
+          "label": "Program name",
+          "required": true,
+          "type": "string",
+          "hint": "The exact program name the activity is attributed to (must already exist in Marketo).",
+          "example": "Product Launch 2026"
+        },
+        {
+          "name": "source",
+          "label": "Source",
+          "required": false,
+          "type": "string",
+          "hint": "Optional free text stored on the activity, e.g. the website or campaign name.",
+          "example": "Pricing page"
+        },
+        {
+          "name": "reason",
+          "label": "Reason",
+          "required": false,
+          "type": "string",
+          "hint": "Optional free text stored on the activity, e.g. what the person did.",
+          "example": "Downloaded pricing sheet"
+        },
+        {
+          "name": "lookupField",
+          "label": "Match existing leads by",
+          "required": false,
+          "type": "string",
+          "placeholder": "email (default)",
+          "hint": "Use mktToken to match by the mkt_tok cookie value instead of a lead field."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "One status per row, plus the activity that was created."
+  },
+  "notes": [
+    "Always performs an upsert — there is no action setting.",
+    "To attach prior anonymous web activity to a new lead, put the mkt_tok value in an 'mktToken' column of that row.",
+    "The program must exist in the same workspace."
+  ]
+}

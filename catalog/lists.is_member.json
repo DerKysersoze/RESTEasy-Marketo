@@ -1,0 +1,41 @@
+{
+  "id": "lists.is_member",
+  "name": "Check List Membership",
+  "group": "Static Lists",
+  "summary": "Tells you, for each listed lead, whether they're a member of a given static list (up to 300 IDs per call).",
+  "whenToUse": "Quick yes/no checks: 'is this person on the exclusion list?' or 'did the enrollment actually work?'",
+  "method": "GET",
+  "path": "/rest/v1/lists/{listId}/leads/ismember.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/list-membership",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "listId",
+        "label": "List ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Static Lists.",
+        "example": "87"
+      }
+    ],
+    "query": [
+      {
+        "name": "id",
+        "label": "Lead ID(s)",
+        "required": true,
+        "type": "csv",
+        "repeat": true,
+        "hint": "Comma-separated lead IDs to check. Max 300 per call.",
+        "example": "309901, 318603"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "One entry per lead ID with their membership status."
+  },
+  "notes": []
+}

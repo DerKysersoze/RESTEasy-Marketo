@@ -1,0 +1,31 @@
+{
+  "id": "lists.by_id",
+  "name": "Get Static List by ID",
+  "group": "Static Lists",
+  "summary": "Fetches one static list's details (name, creation date) using its ID.",
+  "whenToUse": "When you have a list ID and want to confirm which list it is.",
+  "method": "GET",
+  "path": "/rest/v1/lists/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "List ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Static Lists.",
+        "example": "87"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The list's name and metadata."
+  },
+  "notes": []
+}

@@ -1,0 +1,38 @@
+{
+  "id": "leads.schema_fields",
+  "name": "Browse All Lead Fields",
+  "group": "Leads",
+  "summary": "Pages through the complete list of lead fields with full metadata — including custom fields that Describe may not show all of.",
+  "whenToUse": "When you need a comprehensive field inventory. Returns up to 300 fields per page; use the nextPageToken in the response to continue.",
+  "method": "GET",
+  "path": "/rest/v1/leads/schema/fields.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "batchSize",
+        "label": "Fields per page",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. How many fields per page (max 300).",
+        "example": "300"
+      },
+      {
+        "name": "nextPageToken",
+        "label": "Next page token",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Pass the 'nextPageToken' from a previous response to get the next page."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Field metadata (name, display name, type, length, custom or not). 'moreResult' + 'nextPageToken' indicate more pages."
+  },
+  "notes": []
+}

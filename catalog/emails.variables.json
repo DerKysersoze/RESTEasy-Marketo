@@ -1,0 +1,32 @@
+{
+  "id": "emails.variables",
+  "name": "Get Email Variables",
+  "group": "Emails",
+  "summary": "Reads the template variables (spacers, colors, link text) of an email.",
+  "whenToUse": "When you want to see an email template's variable values.",
+  "method": "GET",
+  "path": "/rest/asset/v1/email/{id}/variables.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Email ID",
+        "required": true,
+        "type": "integer",
+        "example": "1356"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Template variables: name, value, and whether they are module-scoped."
+  },
+  "notes": [
+    "moduleScope=true means the variable belongs to one module (the module's id is needed when updating it)."
+  ]
+}

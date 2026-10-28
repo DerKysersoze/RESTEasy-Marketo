@@ -1,0 +1,20 @@
+{
+  "id": "salespersons.describe",
+  "name": "Describe Sales Person",
+  "group": "Sales Persons",
+  "summary": "Shows the Sales Person object: its key fields (id, externalSalesPersonId, email) and the fields you can query by.",
+  "whenToUse": "Before working with sales person records — to see the structure and valid filters.",
+  "method": "GET",
+  "path": "/rest/v1/salespersons/describe.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/sales-persons",
+  "permission": "Read-Only Sales Person",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Object metadata: idField (id), dedupeFields (externalSalesPersonId), searchableFields, field list."
+  },
+  "notes": [
+    "Sales Persons only exist on instances with SFDC or Dynamics Sync enabled, and are only editable via the API (not the Marketo UI)."
+  ]
+}

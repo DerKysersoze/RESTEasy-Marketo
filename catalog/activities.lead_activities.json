@@ -1,0 +1,54 @@
+{
+  "id": "activities.lead_activities",
+  "name": "Get Lead Activities",
+  "group": "Activities",
+  "summary": "Pulls activity history (page views, email opens/clicks, form fills, changes, and more) after a given point in time. The core 'what did people do' data pull.",
+  "whenToUse": "To export or inspect what leads did over a period. First run 'Get Paging Token' for your start date, then use its token here. Use the nextPageToken from each response to keep paging until moreResult is false.",
+  "method": "GET",
+  "path": "/rest/v1/activities.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/activities",
+  "permission": "Read-Only Activity",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "nextPageToken",
+        "label": "Paging token",
+        "required": true,
+        "type": "string",
+        "hint": "Get one from 'Get Paging Token' (for a start date) or copy it from a previous response to continue paging."
+      },
+      {
+        "name": "activityTypeIds",
+        "label": "Only these activity types",
+        "required": false,
+        "type": "csv",
+        "hint": "Optional. Up to 10 activity type IDs, comma-separated (get them from 'Get Activity Types'). Leave blank for all types."
+      },
+      {
+        "name": "leadIds",
+        "label": "Only these leads",
+        "required": false,
+        "type": "csv",
+        "hint": "Optional. Up to 30 lead IDs, comma-separated, to restrict the results."
+      },
+      {
+        "name": "listId",
+        "label": "Only leads in this static list",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Restrict to activities of leads in one static list. Note: from late 2026 this fails on lists with 10,000+ leads."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Up to 300 activities per page: leadId, activityDate, activityTypeId, primaryAttributeValue, attributes[]. 'moreResult' + 'nextPageToken' indicate more pages."
+  },
+  "notes": [
+    "Returns up to 300 items per page — keep paging with the returned nextPageToken until moreResult is false.",
+    "From late 2026, the 'listId' option fails (error 1003) when the list has 10,000+ leads — scope to leadIds or use a Bulk Extract instead."
+  ]
+}

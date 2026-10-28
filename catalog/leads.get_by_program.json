@@ -1,0 +1,49 @@
+{
+  "id": "leads.get_by_program",
+  "name": "Get Leads by Program ID",
+  "group": "Leads",
+  "summary": "Pulls all leads that are members of a specific program, including each lead's membership details (status, how they were acquired, success reached).",
+  "whenToUse": "When you want to see who's in a program and their progression status. Find the program ID from the program's URL in Marketo.",
+  "method": "GET",
+  "path": "/rest/v1/leads/programs/{programId}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The numeric ID of the program (visible in the Marketo UI URL when you open the program).",
+        "example": "42"
+      }
+    ],
+    "query": [
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "lookup",
+        "source": "describe",
+        "hint": "Pick which lead fields to include (the 'membership' details are always included)."
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Maximum records per response (max 300). Leave blank for the default."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Lead records, each with a 'membership' object: progressionStatus, acquiredBy, reachedSuccess, membershipDate (plus stream/cadence for engagement programs)."
+  },
+  "notes": [
+    "Membership details come back on every record even if you don't request them."
+  ]
+}

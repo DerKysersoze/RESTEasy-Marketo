@@ -1,0 +1,45 @@
+{
+  "id": "smartlists.by_program",
+  "name": "Get Program's Smart List",
+  "group": "Lists & Campaigns",
+  "summary": "Fetches the smart list that belongs to a program.",
+  "whenToUse": "When you have a program ID and want the smart list it drives.",
+  "method": "GET",
+  "path": "/rest/asset/v1/program/{programId}/smartList.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-lists",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The program's ID (from List Programs).",
+        "example": "55"
+      }
+    ],
+    "query": [
+      {
+        "name": "includeRules",
+        "label": "Include rules",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "true",
+            "label": "Yes \u2014 include the list's rules"
+          }
+        ],
+        "placeholder": "No (default)"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The program's smart list record."
+  },
+  "notes": []
+}

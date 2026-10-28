@@ -1,0 +1,30 @@
+{
+  "id": "forms.by_name",
+  "name": "Get Form by Name",
+  "group": "Forms",
+  "summary": "Finds a form by its exact name.",
+  "whenToUse": "When you know the form's name but not its ID.",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/byName.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "name",
+        "label": "Form name",
+        "required": true,
+        "type": "string",
+        "example": "Contact Us"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The matching form record, or an error if the name doesn't exist."
+  },
+  "notes": []
+}

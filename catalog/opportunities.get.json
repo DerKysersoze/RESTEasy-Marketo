@@ -1,0 +1,66 @@
+{
+  "id": "opportunities.get",
+  "name": "Get Opportunities",
+  "group": "Opportunities",
+  "summary": "Fetches opportunity records by their external (CRM) ID or Marketo GUID, with optional field selection and paging.",
+  "whenToUse": "When you have opportunity IDs from Salesforce/Dynamics and want the Marketo-side copy of those records.",
+  "method": "GET",
+  "path": "/rest/v1/opportunities.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/opportunities",
+  "permission": "Read-Only Opportunity",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "filterType",
+        "label": "Look up by",
+        "required": true,
+        "type": "select",
+        "options": [
+          { "value": "externalOpportunityId", "label": "External (CRM) opportunity ID" },
+          { "value": "marketoGUID", "label": "Marketo GUID" }
+        ],
+        "hint": "Which ID system the values below are in."
+      },
+      {
+        "name": "filterValues",
+        "label": "ID(s)",
+        "required": true,
+        "type": "csv",
+        "hint": "Comma-separated opportunity IDs. Max 300.",
+        "example": "001xx00000ABCDE, 001xx00000ABCDF"
+      },
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "string",
+        "hint": "Optional comma-separated field API names (see Get Opportunity Fields). Missing fields come back as null.",
+        "example": "name,amount,closeDate"
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Default and max 300."
+      },
+      {
+        "name": "nextPageToken",
+        "label": "Next page token",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Copy nextPageToken from the previous response to continue."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Opportunity records (name, amount, source, marketoGUID, …)."
+  },
+  "notes": [
+    "Only String/Integer custom opportunity fields can be used as filter fields."
+  ]
+}

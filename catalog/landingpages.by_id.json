@@ -1,0 +1,31 @@
+{
+  "id": "landingpages.by_id",
+  "name": "Get Landing Page by ID",
+  "group": "Landing Pages",
+  "summary": "Fetches one landing page's metadata using its ID.",
+  "whenToUse": "When you have a landing page ID and want its details (name, status, URL, folder).",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPage/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-pages",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Landing Page ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Landing Pages.",
+        "example": "1234"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The page's full metadata: name, status, folder, URL, template, \u2026"
+  },
+  "notes": []
+}

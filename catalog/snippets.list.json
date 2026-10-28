@@ -1,0 +1,58 @@
+{
+  "id": "snippets.list",
+  "name": "List Snippets",
+  "group": "Other Assets",
+  "summary": "Browses the snippets (reusable HTML blocks) in your Marketo instance.",
+  "whenToUse": "When you need to find a snippet's ID or see which snippets exist.",
+  "method": "GET",
+  "path": "/rest/asset/v1/snippets.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/snippets",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "status",
+        "label": "Status",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "approved",
+            "label": "Approved"
+          },
+          {
+            "value": "draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "All (default)"
+      },
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "How many snippets to return (with offset to page).",
+        "example": "50"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging. Default 0.",
+        "example": "20"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Snippet records: id, name, status, folder, \u2026"
+  },
+  "notes": [
+    "Snippets are reusable HTML components embedded in emails and landing pages."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "activities.paging_token",
+  "name": "Get Paging Token",
+  "group": "Activities",
+  "summary": "Turns a date into a 'nextPageToken' — the starting point for pulling activities, lead changes, or deleted leads from that moment onward.",
+  "whenToUse": "Always run this first when you want activity history. Example: to pull activities from September 1st, use date 2026-09-01T00:00:00Z, then feed the token into Get Lead Activities.",
+  "method": "GET",
+  "path": "/rest/v1/activities/pagingtoken.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/activities",
+  "permission": "Read-Only Activity",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "date",
+        "label": "Start from date/time (UTC)",
+        "required": false,
+        "type": "datetime",
+        "hint": "Optional. ISO-8601 UTC datetime to start from, e.g. 2026-09-01T00:00:00Z. Leave blank to get a token for 'now' (only recent activity).",
+        "example": "2026-09-01T00:00:00Z"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "A 'pagingToken' string — pass it as nextPageToken to Get Lead Activities / Get Lead Changes / Get Deleted Leads."
+  },
+  "notes": [
+    "This call can take a while on busy instances (Marketo allows it up to 300s)."
+  ]
+}

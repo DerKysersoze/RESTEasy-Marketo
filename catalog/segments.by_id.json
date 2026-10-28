@@ -1,0 +1,33 @@
+{
+  "id": "segments.by_id",
+  "name": "Get Segments in a Segmentation",
+  "group": "Other Assets",
+  "summary": "Lists the individual segments inside a segmentation.",
+  "whenToUse": "When you have a segmentation ID and want its segments (and their IDs).",
+  "method": "GET",
+  "path": "/rest/asset/v1/segmentation/{id}/segments.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/dynamic-content",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Segmentation ID",
+        "required": true,
+        "type": "integer",
+        "hint": "From List Segmentations.",
+        "example": "1001"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "The segments in the segmentation: id, name, status, segmentationId."
+  },
+  "notes": [
+    "The segment IDs here are what you reference in dynamic-content sections."
+  ]
+}

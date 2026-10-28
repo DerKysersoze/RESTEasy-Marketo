@@ -1,0 +1,57 @@
+{
+  "id": "leads.get_by_filter",
+  "name": "Get Leads by Filter Type",
+  "group": "Leads",
+  "summary": "Finds leads whose field matches one of your values — the workhorse for pulling data: by email, by ID, by name, by company, by list, or by any custom field.",
+  "whenToUse": "The most common data pull: 'give me the lead(s) with this email', 'all leads in this static list', 'leads with this lead score'. If more than 1,000 leads match, Marketo refuses — narrow the filter or use a Bulk Extract.",
+  "method": "GET",
+  "path": "/rest/v1/leads.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "filterType",
+        "label": "Filter on (field)",
+        "required": true,
+        "type": "string",
+        "hint": "The lead field to match. Common: email, id, firstName, lastName, company, listId, leadIds, phone, website, or any custom field. Run 'Describe Leads2' for the full allowed list.",
+        "example": "email"
+      },
+      {
+        "name": "filterValues",
+        "label": "Matching value(s)",
+        "required": true,
+        "type": "csv",
+        "hint": "Up to 300 comma-separated values. A lead is returned if its 'Filter on' field equals any of these.",
+        "example": "jane@example.com,john@example.com"
+      },
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "lookup",
+        "source": "describe",
+        "hint": "Pick which fields to include. If you pick none, Marketo returns only the basics: id, email, first name, last name, and created/updated dates."
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Maximum records per response (max 300). Leave blank for the default."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Up to 300 lead records (or fewer). If 'moreResult' is true, a 'nextPageToken' is included for the next page."
+  },
+  "notes": [
+    "More than 1,000 matching leads → error 1003 'Too many results' — narrow the filter or use a Bulk Extract.",
+    "Very long value lists can hit the 8 KB URL limit (error 414) — split into smaller batches."
+  ]
+}

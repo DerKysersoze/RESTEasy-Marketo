@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Marketo Utility catalog entry",
+  "description": "One file per Marketo REST call. This file documents the format; catalog.py validates entries at load time.",
+  "type": "object",
+  "required": ["id", "name", "group", "summary", "method", "path"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_]+)+$", "description": "Stable id used by /api/call/{id}. e.g. leads.get_by_id" },
+    "name": { "type": "string", "description": "Sidebar label" },
+    "group": { "type": "string", "description": "Sidebar section (Leads, Activities, Landing Pages, Bulk Extract, ...)" },
+    "summary": { "type": "string", "description": "1-2 sentence plain-English description of what the call does" },
+    "whenToUse": { "type": "string", "description": "Plain-English guidance on when to use it" },
+    "method": { "enum": ["GET", "POST"] },
+    "path": { "type": "string", "description": "Marketo path with {placeholders}, e.g. /rest/v1/lead/{id}.json (bulk paths omit /rest/)" },
+    "docUrl": { "type": "string", "description": "Adobe Experience League doc page for this call" },
+    "permission": { "type": "string", "description": "Marketo permission required, e.g. 'Read-Only Lead'" },
+    "confirm": { "type": "string", "description": "Optional: plain-English warning shown in a confirm dialog before running (use for destructive calls)" },
+    "params": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "array", "items": { "$ref": "#/definitions/param" } },
+        "query": { "type": "array", "items": { "$ref": "#/definitions/param" } },
+        "body": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["mode"],
+              "properties": {
+                "mode": { "enum": ["freeform", "record", "records", "multipart", "sync", "values"], "description": "freeform = raw JSON textarea (with example); record = single object with fields; records = array of objects (wrapper = top-level key, e.g. 'lead'); multipart = file + text parts (bulk imports); sync = fixed scalar members + a grid of record rows (wrapper = array key, default 'input'); values = comma-separated list of values sent as an array under 'key' (itemKey wraps each value in a single-key object)" },
+                "wrapper": { "type": "string", "description": "sync mode: top-level key holding the records array (default 'input')" },
+                "example": { "type": "string", "description": "JSON example shown to the user (freeform)" },
+                "fields": { "type": "array", "items": { "$ref": "#/definitions/param" }, "description": "record mode: object fields; values mode: extra scalar body members (e.g. deleteBy, statusName)" },
+                "parts": { "type": "array", "items": { "$ref": "#/definitions/param" } },
+                "fixed": { "type": "array", "items": { "$ref": "#/definitions/param" }, "description": "sync mode: top-level scalar members (e.g. action, lookupField)" },
+                "fieldPicker": { "enum": ["describe"], "description": "sync mode: record columns chosen from a lookup (describe = lead field picker); omit to let the user type column names" },
+                "requiredFields": { "type": "array", "items": { "type": "string" }, "description": "sync mode: field names that must appear in every record (pre-checked / first columns)" },
+                "key": { "type": "string", "description": "values mode: top-level key holding the array (default 'input')" },
+                "itemKey": { "type": "string", "description": "values mode: if set, each value is wrapped as {itemKey: value} inside the array" },
+                "type": { "enum": ["string", "integer"], "description": "values mode: type of each value (integer coerces to numbers)" },
+                "maxPerCall": { "type": "integer", "description": "values/sync mode: Marketo's per-call limit, enforced client+server with a friendly message" },
+                "encoding": { "enum": ["json", "form"], "description": "record mode: how the body is sent — json (default, application/json) or form (application/x-www-form-urlencoded; Marketo asset write endpoints such as clone require this, and nested JSON members like folder are sent as JSON strings)" },
+                "wrapKey": { "type": "string", "description": "values mode: if set, the array is nested one level deeper under this key inside 'key' — e.g. key=input + wrapKey=leads builds {\"input\": {\"leads\": […]}} (Request Campaign)" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "shape": { "enum": ["object", "array", "mixed", "job"] },
+        "exportable": { "type": "boolean", "description": "Offer CSV export when the result is a list of records" },
+        "description": { "type": "string" }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "definitions": {
+    "param": {
+      "type": "object",
+      "required": ["name", "label", "type"],
+      "properties": {
+        "name": { "type": "string", "description": "Marketo parameter name" },
+        "label": { "type": "string", "description": "Human-friendly label" },
+        "required": { "type": "boolean", "default": false },
+        "type": {
+          "enum": ["string", "integer", "boolean", "csv", "datetime", "json", "file", "lookup", "select"],
+          "description": "csv = comma-separated list input; lookup = multi-select fed by another call; select = fixed dropdown from 'options'; file = file upload (bulk imports)"
+        },
+        "options": { "type": "array", "items": { "type": "object", "required": ["value", "label"], "properties": { "value": { "type": "string" }, "label": { "type": "string" } } }, "description": "select type: allowed values" },
+        "placeholder": { "type": "string", "description": "select type: text for the leading '(default/omit)' option" },
+        "repeat": { "type": "boolean", "description": "path/query: split comma-separated value into repeated params (id=1&id=2) — used by Add/Remove from List" },
+        "hint": { "type": "string", "description": "Shown under the field, plain English" },
+        "example": { "type": "string", "description": "Shown as placeholder / 'e.g.'" },
+        "source": { "enum": ["describe"], "description": "lookup source: describe = options come from Describe Leads (field picker)" }
+      }
+    }
+  }
+}

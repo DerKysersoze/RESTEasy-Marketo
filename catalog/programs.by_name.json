@@ -1,0 +1,33 @@
+{
+  "id": "programs.by_name",
+  "name": "Get Program by Name",
+  "group": "Programs",
+  "summary": "Finds a program's ID from its exact name — handy when you only know what the program is called.",
+  "whenToUse": "When you know the program name (as shown in the Marketo UI) but not its ID.",
+  "method": "GET",
+  "path": "/rest/asset/v1/program/byName.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "name",
+        "label": "Program name",
+        "required": true,
+        "type": "string",
+        "hint": "The exact program name as it appears in Marketo (case-sensitive).",
+        "example": "Product Launch 2026"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The program's ID and metadata."
+  },
+  "notes": [
+    "The name must match exactly — if you get nothing back, list all programs and copy the name from there."
+  ]
+}

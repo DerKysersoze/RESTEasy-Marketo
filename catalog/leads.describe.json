@@ -1,0 +1,21 @@
+{
+  "id": "leads.describe",
+  "name": "Describe Leads",
+  "group": "Leads",
+  "summary": "Lists every lead field available in your Marketo instance, with its REST API name, data type, and whether it's read-only.",
+  "whenToUse": "Use this to discover field names before other calls — for example to build a 'fields to return' list, or to learn which fields exist and what they're called.",
+  "method": "GET",
+  "path": "/rest/v1/leads/describe.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of field metadata: name (REST API name), restApiName, dataType, label (friendly name), readOnly, length."
+  },
+  "notes": [
+    "No fields required — this call just works.",
+    "Other calls expect the REST API name (e.g. 'email'), not the friendly label (e.g. 'Email Address')."
+  ]
+}

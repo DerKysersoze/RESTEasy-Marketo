@@ -1,0 +1,33 @@
+{
+  "id": "smartcampaigns.activate",
+  "name": "Activate Smart Campaign",
+  "group": "Lists & Campaigns",
+  "summary": "Turns a smart campaign ON so it starts processing leads.",
+  "whenToUse": "When a deactivated campaign is ready to go live.",
+  "method": "POST",
+  "path": "/rest/asset/v1/smartCampaign/{id}/activate.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-campaigns",
+  "permission": "Activate Campaign",
+  "confirm": "This turns the campaign ON \u2014 it will start processing leads. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Smart Campaign ID",
+        "required": true,
+        "type": "integer",
+        "example": "1069"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Confirmation with the campaign ID."
+  },
+  "notes": [
+    "Activation fails unless the campaign is currently deactivated, has at least one trigger and one flow step, and has no errors in its triggers/filters/steps."
+  ]
+}

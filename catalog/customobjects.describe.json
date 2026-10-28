@@ -1,0 +1,31 @@
+{
+  "id": "customobjects.describe",
+  "name": "Describe Custom Object",
+  "group": "Custom Objects",
+  "summary": "Shows one custom object type's full structure: fields, key fields, and relationships.",
+  "whenToUse": "Before querying or writing an object's records — to learn its field API names and which fields can be used as keys.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects/{apiName}/describe.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Only Custom Object",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Object API name",
+        "required": true,
+        "type": "string",
+        "hint": "The object type's API name (lowercase, e.g. car) — find it via List Custom Objects.",
+        "example": "car"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Object metadata: idField, dedupeFields, searchableFields, field list, relationships."
+  },
+  "notes": []
+}

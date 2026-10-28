@@ -1,0 +1,53 @@
+{
+  "id": "leads.program_membership",
+  "name": "Get Programs by Lead ID",
+  "group": "Leads",
+  "summary": "Shows every program that a specific lead is a member of.",
+  "whenToUse": "When you want to see a lead's program memberships and their status in each.",
+  "method": "GET",
+  "path": "/rest/v1/leads/{id}/programMembership.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Lead ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The lead's numeric Marketo ID.",
+        "example": "123456"
+      }
+    ],
+    "query": [
+      {
+        "name": "filterType",
+        "label": "Filter on (optional)",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Restrict the result to programs matching a field, e.g. filter this lead's program memberships by program id."
+      },
+      {
+        "name": "filterValues",
+        "label": "Filter value(s) (optional)",
+        "required": false,
+        "type": "csv",
+        "hint": "Optional. Comma-separated values for the filter above."
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Maximum records per response (max 300). Leave blank for the default."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of program memberships: programId and the lead's membership details."
+  },
+  "notes": []
+}

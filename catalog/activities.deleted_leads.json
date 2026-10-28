@@ -1,0 +1,32 @@
+{
+  "id": "activities.deleted_leads",
+  "name": "Get Deleted Leads",
+  "group": "Activities",
+  "summary": "Pulls the record of leads that were deleted from Marketo, after a given point in time.",
+  "whenToUse": "For audits: find out which leads were deleted and when. Requires a paging token (see Get Paging Token).",
+  "method": "GET",
+  "path": "/rest/v1/activities/deletedleads.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/activities",
+  "permission": "Read-Only Activity",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "nextPageToken",
+        "label": "Paging token",
+        "required": true,
+        "type": "string",
+        "hint": "Get one from 'Get Paging Token' (for a start date) or copy it from a previous response to continue paging."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Up to 300 deletion records per page: leadId, activityDate, primaryAttributeValue (often the lead's name)."
+  },
+  "notes": [
+    "Keep paging with nextPageToken until moreResult is false."
+  ]
+}

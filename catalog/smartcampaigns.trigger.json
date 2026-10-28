@@ -1,0 +1,44 @@
+{
+  "id": "smartcampaigns.trigger",
+  "name": "Run Smart Campaign (request)",
+  "group": "Lists & Campaigns",
+  "summary": "Sends a set of leads through a trigger campaign's flow right now.",
+  "whenToUse": "When you want to run a 'Campaign is Requested' campaign against specific people via the API.",
+  "method": "POST",
+  "path": "/rest/v1/campaigns/{id}/trigger.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-campaigns",
+  "permission": "Read-Write Campaigns",
+  "confirm": "This sends the listed leads through the campaign's flow right now (up to 100 per call). Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Campaign ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The campaign's ID (from List Smart Campaigns \u2014 the campaign's id, not its smart list's).",
+        "example": "1234"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "values",
+      "key": "input",
+      "wrapKey": "leads",
+      "itemKey": "id",
+      "type": "integer",
+      "maxPerCall": 100,
+      "example": "318592, 318593",
+      "hint": "Lead IDs (from the Leads calls). Marketo accepts at most 100 per call."
+    }
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Confirmation that the request was accepted."
+  },
+  "notes": [
+    "The campaign must have a 'Campaign is Requested' trigger with Web Service API as the source, and must be active.",
+    "Token overrides (My Tokens) are not exposed in this form \u2014 see the Marketo docs if you need them."
+  ]
+}

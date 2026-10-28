@@ -1,0 +1,24 @@
+{
+  "id": "campaigns.list",
+  "name": "List Campaigns",
+  "group": "Lists & Campaigns",
+  "summary": "Lists the campaign records from the lead-database API.",
+  "whenToUse": "When you need a quick list of campaign IDs (batch and trigger campaigns).",
+  "method": "GET",
+  "path": "/rest/v1/campaigns.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Only Campaigns",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Campaign records: id, name, status, \u2026"
+  },
+  "notes": [
+    "Richer campaign details (type, activation, smart list) come from 'List Smart Campaigns'."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "campaigns.by_id",
+  "name": "Get Campaign by ID",
+  "group": "Lists & Campaigns",
+  "summary": "Fetches one campaign record from the lead-database API.",
+  "whenToUse": "When you have a campaign ID and want its basic record.",
+  "method": "GET",
+  "path": "/rest/v1/campaigns/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Only Campaigns",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Campaign ID",
+        "required": true,
+        "type": "integer",
+        "example": "1234"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The campaign record."
+  },
+  "notes": []
+}

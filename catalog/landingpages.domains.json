@@ -1,0 +1,40 @@
+{
+  "id": "landingpages.domains",
+  "name": "List Landing Page Domains",
+  "group": "Landing Pages",
+  "summary": "Lists the landing page domains known to this Marketo instance (custom domains, aliases).",
+  "whenToUse": "When you need to know which domains your landing pages can be served from.",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPageDomains.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-page-redirect-rules",
+  "permission": "Read-Only Redirect Rules",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "How many domains to return (with offset to page).",
+        "example": "50"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging. Default 0."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Domain records: hostname and type (e.g. domain-alias)."
+  },
+  "notes": [
+    "Permission per the endpoint reference is 'Read-Only Redirect Rules'."
+  ]
+}

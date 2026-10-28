@@ -1,0 +1,76 @@
+{
+  "id": "emails.full_content",
+  "name": "Preview Email (full HTML)",
+  "group": "Emails",
+  "summary": "Returns the email rendered exactly as a recipient would see it \u2014 optionally as a specific lead.",
+  "whenToUse": "When you want to preview an email's final HTML or text before it goes out.",
+  "method": "GET",
+  "path": "/rest/asset/v1/email/{id}/fullContent.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Email ID",
+        "required": true,
+        "type": "integer",
+        "example": "1356"
+      }
+    ],
+    "query": [
+      {
+        "name": "status",
+        "label": "Version",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "draft",
+            "label": "Draft"
+          },
+          {
+            "value": "approved",
+            "label": "Approved"
+          }
+        ],
+        "placeholder": "Auto (default)",
+        "hint": "Defaults to the approved version (if approved), otherwise the draft."
+      },
+      {
+        "name": "type",
+        "label": "Format",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "HTML",
+            "label": "HTML"
+          },
+          {
+            "value": "Text",
+            "label": "Text"
+          }
+        ],
+        "placeholder": "HTML (default)"
+      },
+      {
+        "name": "leadId",
+        "label": "Preview as lead ID",
+        "required": false,
+        "type": "integer",
+        "hint": "Preview as if this lead received the email (personalized with their data).",
+        "example": "1001"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The email rendered as the recipient would receive it."
+  },
+  "notes": [
+    "Supported only for Version 1.0 emails."
+  ]
+}

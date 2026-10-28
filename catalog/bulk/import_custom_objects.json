@@ -1,0 +1,53 @@
+{
+  "id": "bulk.import_custom_objects",
+  "name": "Import custom objects (bulk)",
+  "group": "Bulk Import",
+  "kind": "import",
+  "summary": "Import a large CSV/TSV/SSV file of custom object records (insert or update). Upload the file, watch the job, then open the failures/warnings file if any rows had problems.",
+  "whenToUse": "Loading or updating many custom object records at once. The first row must be a header of REST API field names that match the object's definition.",
+  "permission": "Write-Only Custom Object (or higher)",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/bulk-import/bulk-custom-object-import",
+  "notes": [
+    "File must be under 10 MB and start with a header row of REST API names for this object.",
+    "All header names must be valid API names for the object (see 'Describe custom object' in the Custom Objects group).",
+    "The job runs asynchronously; check back in a few seconds/minutes.",
+    "After completion, open 'Failures' and/or 'Warnings' to see exactly which rows had issues and why.",
+    "batchId is valid for 7 days."
+  ],
+  "create": {
+    "method": "POST",
+    "path": "/bulk/v1/customobjects/{apiName}/import.json",
+    "multipart": true
+  },
+  "status": { "method": "GET", "path": "/bulk/v1/customobjects/{apiName}/import/{jobId}/status.json" },
+  "failures": { "method": "GET", "path": "/bulk/v1/customobjects/{apiName}/import/{jobId}/failures.json" },
+  "warnings": { "method": "GET", "path": "/bulk/v1/customobjects/{apiName}/import/{jobId}/warnings.json" },
+  "resultId": "batchId",
+  "form": [
+    {
+      "name": "apiName",
+      "label": "Custom object API name",
+      "type": "string",
+      "required": true,
+      "hint": "e.g. car_c — find it in the 'Custom Objects' group (List custom objects)."
+    },
+    {
+      "name": "file",
+      "label": "Object data file",
+      "type": "file",
+      "required": true,
+      "hint": "CSV/TSV/SSV under 10 MB. First row = REST API names for this object."
+    },
+    {
+      "name": "format",
+      "label": "File format",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "csv", "label": "CSV — comma-separated" },
+        { "value": "tsv", "label": "TSV — tab-separated" },
+        { "value": "ssv", "label": "SSV — semicolon-separated" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "salespersons.sync",
+  "name": "Sync Sales Persons (create/update)",
+  "group": "Sales Persons",
+  "summary": "Creates or updates sales person records. One row per person, matched by externalSalesPersonId (usually their email).",
+  "whenToUse": "When you want to seed or refresh rep records (name, email) so leads/opportunities can be linked to them via externalSalesPersonId. Up to 300 per call.",
+  "method": "POST",
+  "path": "/rest/v1/salespersons.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/sales-persons",
+  "permission": "Read-Write Sales Person",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": {
+      "mode": "sync",
+      "wrapper": "input",
+      "requiredFields": ["externalSalesPersonId"],
+      "maxPerCall": 300,
+      "hint": "One row per person. externalSalesPersonId (the CRM ID — often the email) is required; add columns for email, firstName, lastName, etc.",
+      "fixed": [
+        {
+          "name": "action",
+          "label": "Action",
+          "required": false,
+          "type": "select",
+          "placeholder": "createOrUpdate (default)",
+          "options": [
+            { "value": "createOnly", "label": "Create new only" },
+            { "value": "createOrUpdate", "label": "Create or update (default)" },
+            { "value": "updateOnly", "label": "Update existing only" }
+          ]
+        },
+        {
+          "name": "dedupeBy",
+          "label": "Match updates by",
+          "required": false,
+          "type": "select",
+          "placeholder": "dedupeFields (externalSalesPersonId)",
+          "options": [
+            { "value": "dedupeFields", "label": "externalSalesPersonId — default" },
+            { "value": "idField", "label": "id (Marketo's own ID)" }
+          ],
+          "hint": "Only used when Action = updateOnly."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per row: status (created/updated/failed) and the record ID."
+  },
+  "notes": [
+    "Link leads or opportunities to a rep by setting their externalSalesPersonId field to the same value used here.",
+    "Sales person records are API-only — they don't have a page in the Marketo UI."
+  ]
+}

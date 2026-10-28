@@ -1,0 +1,20 @@
+{
+  "id": "opportunities.describe",
+  "name": "Describe Opportunity",
+  "group": "Opportunities",
+  "summary": "Shows the Opportunity object: its key fields (marketoGUID, externalOpportunityId) and the fields you can query by.",
+  "whenToUse": "Before working with opportunities — to see the valid filter fields and the object's structure.",
+  "method": "GET",
+  "path": "/rest/v1/opportunities/describe.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/opportunities",
+  "permission": "Read-Only Opportunity",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Object metadata: idField (marketoGUID), dedupeFields (externalOpportunityId), searchableFields, and the field list."
+  },
+  "notes": [
+    "Opportunities only exist on instances with SFDC or Dynamics Sync enabled."
+  ]
+}

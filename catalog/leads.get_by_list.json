@@ -1,0 +1,49 @@
+{
+  "id": "leads.get_by_list",
+  "name": "Get Leads by List ID",
+  "group": "Leads",
+  "summary": "Pulls all leads that are members of a specific static list.",
+  "whenToUse": "When you want the members of one static list. Find the list ID by opening the list in Marketo and looking at the number in its URL.",
+  "method": "GET",
+  "path": "/rest/v1/lists/{listId}/leads.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "listId",
+        "label": "Static list ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The numeric ID of the static list (visible in the Marketo UI URL when you open the list).",
+        "example": "1001"
+      }
+    ],
+    "query": [
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "lookup",
+        "source": "describe",
+        "hint": "Pick which fields to include. If you pick none, Marketo returns only the basics: id, email, first name, last name, and created/updated dates."
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Maximum records per response (max 300). Leave blank for the default."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Lead records in the list, up to 300 per page. 'moreResult' + 'nextPageToken' indicate more pages."
+  },
+  "notes": [
+    "For large lists (thousands of members), a Bulk Extract of the static list is the better tool (Phase 4)."
+  ]
+}

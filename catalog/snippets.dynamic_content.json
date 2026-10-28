@@ -1,0 +1,32 @@
+{
+  "id": "snippets.dynamic_content",
+  "name": "Get Snippet Dynamic Content",
+  "group": "Other Assets",
+  "summary": "Shows the per-segment variations of a snippet's dynamic section.",
+  "whenToUse": "When a snippet is segmented and you want to see each segment's version.",
+  "method": "GET",
+  "path": "/rest/asset/v1/snippet/{id}/dynamicContent.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/snippets",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Snippet ID",
+        "required": true,
+        "type": "integer",
+        "example": "83"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The dynamic section: one content variation per segment in the snippet's segmentation (plus the default)."
+  },
+  "notes": [
+    "A snippet can hold only one dynamic section; this call shows every segment's variation."
+  ]
+}

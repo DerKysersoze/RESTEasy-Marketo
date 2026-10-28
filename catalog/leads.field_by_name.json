@@ -1,0 +1,31 @@
+{
+  "id": "leads.field_by_name",
+  "name": "Get Lead Field by Name",
+  "group": "Leads",
+  "summary": "Retrieves full metadata for a single lead field by its REST API name — type, length, description, whether it's custom.",
+  "whenToUse": "When you need the details of one specific field (e.g. to confirm its type before syncing data to it).",
+  "method": "GET",
+  "path": "/rest/v1/leads/schema/fields/{fieldApiName}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "fieldApiName",
+        "label": "Field API name",
+        "required": true,
+        "type": "string",
+        "hint": "The field's REST API name (e.g. 'email', 'leadScore', or your custom field name).",
+        "example": "leadScore"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "One field's metadata: name, displayName, dataType, length, description, isCustom, readOnly."
+  },
+  "notes": []
+}

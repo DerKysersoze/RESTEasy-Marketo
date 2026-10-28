@@ -1,0 +1,59 @@
+{
+  "id": "forms.clone",
+  "name": "Clone Form",
+  "group": "Forms",
+  "summary": "Makes a copy of a form into a new name and folder.",
+  "whenToUse": "When you want to start from an existing form without risking the original.",
+  "method": "POST",
+  "path": "/rest/asset/v1/form/{id}/clone.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Write Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Source form ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The form to copy.",
+        "example": "736"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "record",
+      "encoding": "form",
+      "fields": [
+        {
+          "name": "name",
+          "label": "New form name",
+          "required": true,
+          "type": "string",
+          "example": "Contact Us v2"
+        },
+        {
+          "name": "folder",
+          "label": "Destination folder",
+          "required": true,
+          "type": "json",
+          "example": "{\"id\":293,\"type\":\"Folder\"}",
+          "hint": "JSON object with id and type \u2014 e.g. {\"id\":293,\"type\":\"Folder\"} or {\"id\":11,\"type\":\"Program\"}."
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The new cloned form record."
+  },
+  "notes": [
+    "Marketo expects this call as form-urlencoded (not JSON) \u2014 the utility handles that automatically."
+  ]
+}

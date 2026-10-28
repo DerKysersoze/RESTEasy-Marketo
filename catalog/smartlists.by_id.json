@@ -1,0 +1,48 @@
+{
+  "id": "smartlists.by_id",
+  "name": "Get Smart List by ID",
+  "group": "Lists & Campaigns",
+  "summary": "Fetches one smart list's details \u2014 optionally including its rules (triggers and filters).",
+  "whenToUse": "When you have a smart list ID and want to see what it contains.",
+  "method": "GET",
+  "path": "/rest/asset/v1/smartList/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-lists",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Smart List ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Smart Lists.",
+        "example": "4363"
+      }
+    ],
+    "query": [
+      {
+        "name": "includeRules",
+        "label": "Include rules",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "true",
+            "label": "Yes \u2014 include the list's rules"
+          }
+        ],
+        "placeholder": "No (default)",
+        "hint": "Adds the list's triggers and filters to the response."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The smart list record (with rules when requested)."
+  },
+  "notes": [
+    "In the Marketo UI the 'in' operator for Member of List appears as 'is' in the API response."
+  ]
+}

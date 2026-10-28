@@ -1,0 +1,18 @@
+{
+  "id": "customobjects.data_types",
+  "name": "List Field Data Types",
+  "group": "Custom Objects",
+  "summary": "Lists the data types you can use when adding custom object fields (string, integer, boolean, email, date, …).",
+  "whenToUse": "When adding fields to a custom object type and you need the exact allowed dataType values.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects/schema/fieldDataTypes.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "A flat list of allowed type names, e.g. string, boolean, integer, float, email, date, datetime, phone, text."
+  },
+  "notes": []
+}

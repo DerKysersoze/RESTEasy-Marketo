@@ -1,0 +1,24 @@
+{
+  "id": "forms.program_member_fields",
+  "name": "List Program Member Form Fields",
+  "group": "Forms",
+  "summary": "Lists the custom Program Member fields that can be added to forms.",
+  "whenToUse": "When a form (under a Program) should capture Program Member custom fields.",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/programMemberFields.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Program Member custom fields: id, isRequired, dataType, maxLength, \u2026"
+  },
+  "notes": [
+    "The form (and any landing page embedding it) must live under a Program, not in Design Studio."
+  ]
+}

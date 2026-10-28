@@ -1,0 +1,31 @@
+{
+  "id": "landingpages.by_name",
+  "name": "Get Landing Page by Name",
+  "group": "Landing Pages",
+  "summary": "Finds a landing page by its exact name.",
+  "whenToUse": "When you know the page's name but not its ID.",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPage/byName.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-pages",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "name",
+        "label": "Page name",
+        "required": true,
+        "type": "string",
+        "hint": "The exact page name.",
+        "example": "Thank You Page"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The matching page's metadata, or an error if the name doesn't exist."
+  },
+  "notes": []
+}

@@ -1,0 +1,51 @@
+{
+  "id": "leads.merge",
+  "name": "Merge Leads",
+  "group": "Leads",
+  "summary": "Combines duplicate lead records into one. The lead you name first is the WINNER; the others are absorbed (activities, memberships, CRM info, field values).",
+  "whenToUse": "When you have duplicate people and want to collapse them into one record. Be careful — this is permanent.",
+  "method": "POST",
+  "path": "/rest/v1/leads/{id}/merge.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Write Lead",
+  "confirm": "Merge is PERMANENT. The winner lead absorbs all losing leads (their activities, list/program memberships, CRM info, and non-empty field values), and the losing records disappear. Max 25 losing leads per call. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Winning lead ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The record to KEEP. When field values conflict, the winner's value wins (unless it's empty).",
+        "example": "123456"
+      }
+    ],
+    "query": [
+      {
+        "name": "leadIds",
+        "label": "Losing lead ID(s)",
+        "required": true,
+        "type": "csv",
+        "hint": "Comma-separated IDs of the duplicates to absorb. Max 25 (since 2026-03-31 — more returns error 1080).",
+        "example": "654321, 654322"
+      },
+      {
+        "name": "mergeInCRM",
+        "label": "Also merge in the CRM",
+        "required": false,
+        "type": "boolean",
+        "hint": "Only for SFDC-synced instances: perform the merge in Salesforce too. Note: CRM lead/contact type rules can override your chosen winner."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Just success/failure — Marketo returns {success: true} when the merge completes."
+  },
+  "notes": [
+    "Merge takes up to ~3 minutes server-side; it may return success before everything has settled.",
+    "If both records are in Salesforce and one is a contact while the other is a lead, the contact wins regardless of your choice."
+  ]
+}

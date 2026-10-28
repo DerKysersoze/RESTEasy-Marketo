@@ -1,0 +1,31 @@
+{
+  "id": "emails.by_id",
+  "name": "Get Email by ID",
+  "group": "Emails",
+  "summary": "Fetches one email's details using its ID.",
+  "whenToUse": "When you have an email ID and want its subject, from/reply addresses, folder, and status.",
+  "method": "GET",
+  "path": "/rest/asset/v1/email/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Email ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Emails.",
+        "example": "1356"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The full email record: subject, from/reply, folder, status, template, CC fields, \u2026"
+  },
+  "notes": []
+}

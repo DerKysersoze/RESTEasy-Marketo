@@ -1,0 +1,40 @@
+{
+  "id": "programs.member_data",
+  "name": "Sync Program Member Data",
+  "group": "Programs",
+  "summary": "Updates program member custom fields (e.g. registration codes, webinar URLs) for leads that are already in the program. One row per lead.",
+  "whenToUse": "When you have per-person data for program members — registration codes, seat assignments, notes — and want to store it on their program membership.",
+  "method": "POST",
+  "path": "/rest/v1/programs/{programId}/members.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/program-members",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Programs.",
+        "example": "55"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "sync",
+      "wrapper": "input",
+      "requiredFields": ["leadId"],
+      "maxPerCall": 300,
+      "hint": "One row per lead. leadId is required in every row; add a column for each program member field to set (API names — see 'Describe Program Member'). Only fields marked updateable can be written."
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per lead: updated or skipped (e.g. 'Membership not found' when the lead isn't in the program)."
+  },
+  "notes": [
+    "The lead must already be a member of the program — this call does not add members (use Set Program Member Status first if needed).",
+    "Only fields with updateable=true can be set; standard fields like statusName are managed by the status call."
+  ]
+}

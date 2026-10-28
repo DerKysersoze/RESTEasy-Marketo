@@ -1,0 +1,41 @@
+{
+  "id": "activities.lead_changes",
+  "name": "Get Lead Changes",
+  "group": "Activities",
+  "summary": "Pulls field-level data changes: which field, old value, new value, when — for the fields you name.",
+  "whenToUse": "To audit what changed on leads (e.g. 'when did email change?' or 'what values did leadScore take?'). Requires a paging token (see Get Paging Token) and a list of fields to watch.",
+  "method": "GET",
+  "path": "/rest/v1/activities/leadchanges.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/activities",
+  "permission": "Read-Only Activity",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "nextPageToken",
+        "label": "Paging token",
+        "required": true,
+        "type": "string",
+        "hint": "Get one from 'Get Paging Token' (for a start date) or copy it from a previous response to continue paging."
+      },
+      {
+        "name": "fields",
+        "label": "Fields to watch",
+        "required": true,
+        "type": "lookup",
+        "source": "describe",
+        "hint": "Pick the fields whose value changes you want to see (e.g. email, leadScore, status)."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Up to 300 changes per page: leadId, activityDate, and a fields[] array with name, oldValue, newValue for each change."
+  },
+  "notes": [
+    "Returns only 'Data Value Change' and 'New Lead' activities.",
+    "Keep paging with nextPageToken until moreResult is false."
+  ]
+}

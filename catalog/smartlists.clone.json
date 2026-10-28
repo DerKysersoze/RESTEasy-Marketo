@@ -1,0 +1,60 @@
+{
+  "id": "smartlists.clone",
+  "name": "Clone Smart List",
+  "group": "Lists & Campaigns",
+  "summary": "Makes a copy of a smart list into a new name and folder.",
+  "whenToUse": "When you want to reuse an existing list's logic without touching the original.",
+  "method": "POST",
+  "path": "/rest/asset/v1/smartList/{id}/clone.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-lists",
+  "permission": "Read-Write Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Source list ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The list to copy.",
+        "example": "4363"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "record",
+      "encoding": "form",
+      "fields": [
+        {
+          "name": "name",
+          "label": "New list name",
+          "required": true,
+          "type": "string",
+          "hint": "Must be unique in the instance.",
+          "example": "2018 Leads Qualified"
+        },
+        {
+          "name": "folder",
+          "label": "Destination folder",
+          "required": true,
+          "type": "json",
+          "example": "{\"id\":31,\"type\":\"Folder\"}",
+          "hint": "Must be a Program or a smart-list folder \u2014 JSON object with id and type."
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The new cloned smart list record."
+  },
+  "notes": [
+    "Marketo expects this call as form-urlencoded (not JSON) \u2014 the utility handles that automatically."
+  ]
+}

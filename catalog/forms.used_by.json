@@ -1,0 +1,30 @@
+{
+  "id": "forms.used_by",
+  "name": "Get Form Used By",
+  "group": "Forms",
+  "summary": "Lists the assets that depend on a form \u2014 landing pages, smart lists, campaigns, reports, email programs.",
+  "whenToUse": "Before deleting or heavily changing a form, to see what would break.",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/{id}/usedBy.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Write Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Form ID",
+        "required": true,
+        "type": "integer",
+        "example": "736"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Assets that use the form: Landing Pages, Smart Lists, Smart Campaigns, Reports, Email Programs."
+  },
+  "notes": []
+}

@@ -1,0 +1,34 @@
+{
+  "id": "customobjects.approve",
+  "name": "Approve Custom Object Type",
+  "group": "Custom Objects",
+  "summary": "Publishes a draft custom object type as the new approved version (the draft is deleted). This makes its fields usable.",
+  "whenToUse": "After creating a type and adding its fields — approval is the final step before you can store records on it.",
+  "method": "POST",
+  "path": "/rest/v1/customobjects/schema/{apiName}/approve.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "confirm": "Publish the draft as the new approved version — the draft is deleted. The type must be in draft state and pass validation. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Type API name",
+        "required": true,
+        "type": "string",
+        "hint": "The draft type to publish.",
+        "example": "car"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Success flag."
+  },
+  "notes": [
+    "You can only approve a type that is in draft state; already-approved types can't be re-approved."
+  ]
+}

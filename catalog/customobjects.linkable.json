@@ -1,0 +1,18 @@
+{
+  "id": "customobjects.linkable",
+  "name": "List Linkable Objects",
+  "group": "Custom Objects",
+  "summary": "Lists the object types a custom object can be linked to (Lead, Company, and your other custom objects) and the link fields — used for one-to-many/many-to-many designs.",
+  "whenToUse": "When modeling relationships (e.g. a Car linked to a Lead) and you need the allowed target objects and their link fields.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects/schema/linkableObjects.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Linkable objects (Lead, Company, custom types) with their link fields."
+  },
+  "notes": []
+}

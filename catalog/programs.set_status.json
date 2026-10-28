@@ -1,0 +1,52 @@
+{
+  "id": "programs.set_status",
+  "name": "Set Program Member Status",
+  "group": "Programs",
+  "summary": "Sets the program status for leads — and ADDS them to the program if they're not members yet. A 'Change Program Status' activity is logged for each.",
+  "whenToUse": "The main call for enrolling people in a program and/or moving them to a status (Member, Influenced, Completed, …). Up to 300 leads per call.",
+  "method": "POST",
+  "path": "/rest/v1/programs/{programId}/members/status.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/program-members",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Programs.",
+        "example": "55"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "values",
+      "key": "input",
+      "itemKey": "leadId",
+      "type": "integer",
+      "maxPerCall": 300,
+      "hint": "Lead IDs to create/update in the program — comma-separated.",
+      "example": "1800, 1801, 1235",
+      "fields": [
+        {
+          "name": "statusName",
+          "label": "Status to set",
+          "required": true,
+          "type": "string",
+          "hint": "Must be a status that exists on this program (defined by its channel) — e.g. Member, Influenced, Completed. Check the program's settings in the Marketo UI if unsure.",
+          "example": "Influenced"
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per lead: created, updated, or skipped (with a reason — e.g. already at a higher status step)."
+  },
+  "notes": [
+    "Leads not in the program are ADDED as new members; leads already in it get their status updated.",
+    "If a lead's current status is a further step along the channel than the one you set, that lead is skipped (reason code 1037) — statuses don't move backwards."
+  ]
+}

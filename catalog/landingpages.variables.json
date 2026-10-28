@@ -1,0 +1,33 @@
+{
+  "id": "landingpages.variables",
+  "name": "Get Landing Page Variables",
+  "group": "Landing Pages",
+  "summary": "Reads the template variables (strings, colors, booleans) of a guided landing page.",
+  "whenToUse": "When you want to see the values of a guided page's variables (e.g. header text, colors).",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPage/{id}/variables.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-pages",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Landing Page ID",
+        "required": true,
+        "type": "integer",
+        "hint": "A guided (template-based) page's ID.",
+        "example": "1234"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Variables defined in the template's <head> meta tags: id, value, type (string/color/boolean)."
+  },
+  "notes": [
+    "Only guided (template-based) landing pages have variables \u2014 free-form pages won't return any."
+  ]
+}

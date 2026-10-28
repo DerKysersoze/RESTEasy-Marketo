@@ -1,0 +1,74 @@
+{
+  "id": "smartcampaigns.list",
+  "name": "List Smart Campaigns",
+  "group": "Lists & Campaigns",
+  "summary": "Browses the smart campaigns in your Marketo instance \u2014 name, status, type, folder.",
+  "whenToUse": "When you need to find a smart campaign's ID or see which campaigns exist.",
+  "method": "GET",
+  "path": "/rest/asset/v1/smartCampaigns.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-campaigns",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "folder",
+        "label": "Folder",
+        "required": false,
+        "type": "json",
+        "example": "{\"id\":327,\"type\":\"Folder\"}",
+        "hint": "Limit to one folder (JSON object with id and type)."
+      },
+      {
+        "name": "earliestUpdatedAt",
+        "label": "Updated after",
+        "required": false,
+        "type": "datetime",
+        "hint": "ISO-8601 without milliseconds, e.g. 2026-09-10T23:15:00-00:00"
+      },
+      {
+        "name": "latestUpdatedAt",
+        "label": "Updated before",
+        "required": false,
+        "type": "datetime",
+        "hint": "ISO-8601 without milliseconds \u2014 must be after 'Updated after'."
+      },
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "Default 20, maximum 200.",
+        "example": "50"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging. Default 0.",
+        "example": "20"
+      },
+      {
+        "name": "isActive",
+        "label": "Only active",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "true",
+            "label": "Yes \u2014 only active trigger campaigns"
+          }
+        ],
+        "placeholder": "No (default)"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Smart campaign records: id, name, status, type (batch/trigger), smartListId, \u2026"
+  },
+  "notes": []
+}

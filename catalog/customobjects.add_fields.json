@@ -1,0 +1,40 @@
+{
+  "id": "customobjects.add_fields",
+  "name": "Add Fields to Type",
+  "group": "Custom Objects",
+  "summary": "Adds one or more fields to a custom object type (draft). One row per field: display name, API name, and data type.",
+  "whenToUse": "When you're modeling a new (or existing draft) custom object type and want to give it more fields. Max 20 fields per call.",
+  "method": "POST",
+  "path": "/rest/v1/customobjects/schema/{apiName}/addField.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Type API name",
+        "required": true,
+        "type": "string",
+        "hint": "The type to add fields to (must be in draft state).",
+        "example": "car"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "sync",
+      "wrapper": "input",
+      "requiredFields": ["displayName", "name", "dataType"],
+      "maxPerCall": 20,
+      "hint": "One row per field. displayName = what people see; name = the API name (letters, digits, underscores); dataType = one of the allowed types (see List Field Data Types — e.g. string, integer, boolean, email, date, text)."
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": false,
+    "description": "Per field: its API name and status (created)."
+  },
+  "notes": [
+    "Fields are added to the DRAFT version — remember to Approve the type afterwards for the changes to take effect.",
+    "A dedupe field (isDedupeField) is required for one-to-many relationships; most objects need one (e.g. VIN on a Car)."
+  ]
+}

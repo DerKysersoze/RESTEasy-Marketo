@@ -1,0 +1,20 @@
+{
+  "id": "programs.list",
+  "name": "Get Programs",
+  "group": "Programs",
+  "summary": "Lists all programs in your instance with their IDs — the first step for any program membership or status work.",
+  "whenToUse": "When you need a program's numeric ID (the UI shows names; the API wants IDs).",
+  "method": "GET",
+  "path": "/rest/asset/v1/programs.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Only Asset",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "One entry per program: id, name, status, workspace, and more."
+  },
+  "notes": [
+    "Program IDs are per-instance — they don't transfer between Marketo instances."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "landingpages.full_content",
+  "name": "Preview Landing Page (full HTML)",
+  "group": "Landing Pages",
+  "summary": "Returns the page rendered exactly as a browser would show it \u2014 optionally as a specific lead or segment.",
+  "whenToUse": "When you want to see exactly what a visitor (or a specific lead/segment) will see.",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPage/{id}/fullContent.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-pages",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Landing Page ID",
+        "required": true,
+        "type": "integer",
+        "example": "1234"
+      }
+    ],
+    "query": [
+      {
+        "name": "leadId",
+        "label": "Preview as lead ID",
+        "required": false,
+        "type": "integer",
+        "hint": "The preview represents that lead's data.",
+        "example": "1001"
+      },
+      {
+        "name": "segmentation",
+        "label": "Preview as segments",
+        "required": false,
+        "type": "json",
+        "example": "[{\"segmentationId\":1030,\"segmentId\":1103}]",
+        "hint": "JSON array of {segmentationId, segmentId} objects \u2014 preview as a lead matching those segments."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The browser-rendered HTML of the page."
+  },
+  "notes": []
+}

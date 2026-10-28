@@ -1,0 +1,24 @@
+{
+  "id": "segments.list",
+  "name": "List Segmentations",
+  "group": "Other Assets",
+  "summary": "Lists the segmentations (named sets of segments) available for dynamic content.",
+  "whenToUse": "When you need a segmentation's ID to build dynamic content in emails, landing pages, or snippets.",
+  "method": "GET",
+  "path": "/rest/asset/v1/segmentation.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/dynamic-content",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Segmentations: id, name, status, folder, \u2026"
+  },
+  "notes": [
+    "A segmentation is a named list of rule sets (e.g. 'My Industry Segmentation') that Marketo evaluates against the lead database."
+  ]
+}

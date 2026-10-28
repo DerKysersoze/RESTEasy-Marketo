@@ -1,0 +1,33 @@
+{
+  "id": "smartcampaigns.deactivate",
+  "name": "Deactivate Smart Campaign",
+  "group": "Lists & Campaigns",
+  "summary": "Turns a smart campaign OFF.",
+  "whenToUse": "When an active campaign should stop processing leads.",
+  "method": "POST",
+  "path": "/rest/asset/v1/smartCampaign/{id}/deactivate.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-campaigns",
+  "permission": "Deactivate Campaign",
+  "confirm": "This turns the campaign OFF. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Smart Campaign ID",
+        "required": true,
+        "type": "integer",
+        "example": "1069"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Confirmation with the campaign ID."
+  },
+  "notes": [
+    "Only an active campaign can be deactivated."
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "customobjects.sync",
+  "name": "Sync Custom Object Records (create/update)",
+  "group": "Custom Objects",
+  "summary": "Creates or updates records on a custom object type. One row per record, matched by the object's dedupe field.",
+  "whenToUse": "When you have per-lead custom data (e.g. a person's car VIN + details) to create or refresh in Marketo. Up to 300 per call.",
+  "method": "POST",
+  "path": "/rest/v1/customobjects/{apiName}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Object API name",
+        "required": true,
+        "type": "string",
+        "hint": "The object type's API name — find it via List Custom Objects.",
+        "example": "car"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "sync",
+      "wrapper": "input",
+      "maxPerCall": 300,
+      "hint": "One row per record. Include the object's dedupe field (see Describe Custom Object — e.g. vin) so Marketo can match existing records, plus the field values to set.",
+      "fixed": [
+        {
+          "name": "action",
+          "label": "Action",
+          "required": false,
+          "type": "select",
+          "placeholder": "createOrUpdate (default)",
+          "options": [
+            { "value": "createOnly", "label": "Create new only" },
+            { "value": "createOrUpdate", "label": "Create or update (default)" },
+            { "value": "updateOnly", "label": "Update existing only" }
+          ]
+        },
+        {
+          "name": "dedupeBy",
+          "label": "Match updates by",
+          "required": false,
+          "type": "select",
+          "placeholder": "dedupeFields (default)",
+          "options": [
+            { "value": "dedupeFields", "label": "The object's dedupe field — default" },
+            { "value": "idField", "label": "marketoGUID (Marketo's own ID)" }
+          ],
+          "hint": "Only used when Action = updateOnly."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per row: marketoGUID, status (created/updated/failed), and the row sequence number."
+  },
+  "notes": [
+    "This call can take up to 2 minutes server-side — patience on large batches.",
+    "Check the object's Describe response for the exact dedupe field and allowed field names."
+  ]
+}

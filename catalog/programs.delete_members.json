@@ -1,0 +1,42 @@
+{
+  "id": "programs.delete_members",
+  "name": "Remove Program Members",
+  "group": "Programs",
+  "summary": "Deletes program member records for the listed leads (up to 300 per call) — i.e. removes them from the program. The lead records themselves are untouched.",
+  "whenToUse": "When people should no longer be in the program at all (different from just changing their status).",
+  "method": "POST",
+  "path": "/rest/v1/programs/{programId}/members/delete.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/program-members",
+  "permission": "Read-Write Lead",
+  "confirm": "Remove the listed leads from this program (their membership record is deleted — the lead records themselves are NOT). Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Programs.",
+        "example": "55"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "values",
+      "key": "input",
+      "itemKey": "leadId",
+      "type": "integer",
+      "maxPerCall": 300,
+      "hint": "Lead IDs to remove from the program — comma-separated.",
+      "example": "1235, 77"
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per lead: deleted or skipped (e.g. 'Lead not in program')."
+  },
+  "notes": [
+    "This is the API equivalent of taking someone out of the program entirely — their program member fields come with the deleted record."
+  ]
+}

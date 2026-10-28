@@ -1,0 +1,78 @@
+{
+  "id": "bulk.extract_activities",
+  "name": "Extract activities (bulk)",
+  "group": "Bulk Extract",
+  "kind": "extract",
+  "summary": "Export a range of activities (form fills, page views, status changes, …) to a CSV/TSV/SSV file. Requires a date range of 31 days or fewer; optionally narrow to activity types or specific assets.",
+  "whenToUse": "CRM syncs, ETL, data warehousing, or archiving large activity history. Use the normal 'Get Lead Activities' call for quick lookups of a few leads.",
+  "permission": "Read-Only Activity or Read-Write Activity",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/bulk-extract/bulk-activity-extract",
+  "notes": [
+    "The 'Delete Lead' activity type is not supported here — use the 'Get Deleted Leads' call instead.",
+    "Date range must be 31 days or fewer; datetimes are ISO-8601 without milliseconds.",
+    "Jobs run asynchronously — the file is usually ready within minutes.",
+    "If you filter by primary attribute (a specific form/list/program), you must also select matching activity types.",
+    "Export files are kept by Marketo for 10 days."
+  ],
+  "create": {
+    "method": "POST",
+    "path": "/bulk/v1/activities/export/create.json"
+  },
+  "enqueue": { "method": "POST", "path": "/bulk/v1/activities/export/{jobId}/enqueue.json" },
+  "status":  { "method": "GET",  "path": "/bulk/v1/activities/export/{jobId}/status.json" },
+  "file":    { "method": "GET",  "path": "/bulk/v1/activities/export/{jobId}/file.json" },
+  "cancel":  { "method": "POST", "path": "/bulk/v1/activities/export/{jobId}/cancel.json" },
+  "resultId": "exportId",
+  "form": [
+    {
+      "name": "startAt",
+      "label": "Activities created from",
+      "type": "datetime",
+      "required": true,
+      "hint": "ISO format, e.g. 2026-01-01T00:00:00Z — no milliseconds."
+    },
+    {
+      "name": "endAt",
+      "label": "Activities created to",
+      "type": "datetime",
+      "required": true,
+      "hint": "The range must be 31 days or fewer."
+    },
+    {
+      "name": "activityTypeIds",
+      "label": "Activity types (optional)",
+      "type": "lookup",
+      "source": "activityTypes",
+      "hint": "Leave empty to include all activity types. Find IDs in the 'Activities' group (List activity types)."
+    },
+    {
+      "name": "primaryAttributeValueIds",
+      "label": "Only for specific assets — by ID (optional, advanced)",
+      "type": "csv",
+      "hint": "Up to 50 IDs of forms, static lists, programs, or lead fields. Requires activity types above to be set. Mutually exclusive with the names option."
+    },
+    {
+      "name": "primaryAttributeValues",
+      "label": "Only for specific assets — by name (optional, advanced)",
+      "type": "csv",
+      "hint": "Up to 50 names. Program/list/form assets use '<program>.<name>' notation, e.g. GL_OP_ALL.MPS Outbound. Requires activity types above to be set. Mutually exclusive with the ID option."
+    },
+    {
+      "name": "format",
+      "label": "File format",
+      "type": "select",
+      "placeholder": "CSV (default)",
+      "options": [
+        { "value": "CSV", "label": "CSV — comma-separated" },
+        { "value": "TSV", "label": "TSV — tab-separated" },
+        { "value": "SSV", "label": "SSV — space-separated" }
+      ]
+    },
+    {
+      "name": "fields",
+      "label": "Columns (optional — advanced)",
+      "type": "csv",
+      "hint": "Leave empty for the standard columns (marketoGUID, leadId, activityDate, activityTypeId, campaignId, primaryAttributeValueId, primaryAttributeValue, attributes). Allowed names: those plus actionResult."
+    }
+  ]
+}

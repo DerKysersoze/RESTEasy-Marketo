@@ -1,0 +1,22 @@
+{
+  "id": "forms.available_fields",
+  "name": "List Available Form Fields",
+  "group": "Forms",
+  "summary": "Lists the lead fields that can be added to forms, with their data types and default metadata.",
+  "whenToUse": "When you want to know which fields a form can collect.",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/fields.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Lead fields usable in forms: id, isRequired, dataType, maxLength, picklist values, \u2026"
+  },
+  "notes": []
+}

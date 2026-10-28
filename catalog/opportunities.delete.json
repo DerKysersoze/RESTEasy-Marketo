@@ -1,0 +1,45 @@
+{
+  "id": "opportunities.delete",
+  "name": "Delete Opportunities",
+  "group": "Opportunities",
+  "summary": "Permanently deletes opportunity records, matched by their CRM ID (default) or Marketo GUID. Up to 300 per call.",
+  "whenToUse": "When opportunity records in Marketo should be removed. There is no undo.",
+  "method": "POST",
+  "path": "/rest/v1/opportunities/delete.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/opportunities",
+  "permission": "Read-Write Opportunity",
+  "confirm": "This PERMANENTLY deletes up to 300 opportunity records. This cannot be undone. Continue?",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": {
+      "mode": "values",
+      "key": "input",
+      "itemKey": "externalOpportunityId",
+      "type": "string",
+      "maxPerCall": 300,
+      "hint": "Comma-separated IDs to delete — by default the external (CRM) opportunity IDs.",
+      "example": "19UYA31581L000000, 29UYA31581L000000",
+      "fields": [
+        {
+          "name": "deleteBy",
+          "label": "Delete by",
+          "required": false,
+          "type": "select",
+          "placeholder": "dedupeFields (CRM IDs)",
+          "options": [
+            { "value": "dedupeFields", "label": "externalOpportunityId (CRM IDs)" },
+            { "value": "idField", "label": "marketoGUID (Marketo's own IDs)" }
+          ],
+          "hint": "If you switch to marketoGUID, paste GUIDs in the values box instead."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per record: marketoGUID and status (deleted or skipped with a reason)."
+  },
+  "notes": []
+}

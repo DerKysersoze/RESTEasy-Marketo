@@ -1,0 +1,46 @@
+{
+  "id": "customobjects.types",
+  "name": "List Custom Object Types",
+  "group": "Custom Objects",
+  "summary": "Lists the custom object TYPES (the schemas) in your instance, with optional filtering by name and version state.",
+  "whenToUse": "Admin view: see what custom object types exist (draft vs approved) and their key fields.",
+  "method": "GET",
+  "path": "/rest/v1/customobjects/schema.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "state",
+        "label": "Version state",
+        "required": false,
+        "type": "select",
+        "placeholder": "Approved (if one exists), else draft",
+        "options": [
+          { "value": "draft", "label": "Draft versions" },
+          { "value": "approved", "label": "Approved versions" },
+          { "value": "approvedWithDraft", "label": "Approved, plus draft if there is one" }
+        ],
+        "hint": "Custom object types have draft and approved versions; this picks which to show."
+      },
+      {
+        "name": "names",
+        "label": "Limit to names",
+        "required": false,
+        "type": "csv",
+        "hint": "Optional comma-separated API names to restrict the result.",
+        "example": "car, course"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Type metadata: state, version, displayName, apiName, dedupeFields, searchableFields, relationships."
+  },
+  "notes": [
+    "Max 10 custom object types and 50 fields per type per Marketo's limits."
+  ]
+}

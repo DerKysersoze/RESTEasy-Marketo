@@ -1,0 +1,58 @@
+{
+  "id": "opportunities.sync",
+  "name": "Sync Opportunities (create/update)",
+  "group": "Opportunities",
+  "summary": "Creates or updates opportunity records. One row per opportunity; the name field is required and externalOpportunityId ties the row to the CRM record.",
+  "whenToUse": "When you want to push opportunity data (amount, notes, custom fields) from outside into Marketo's opportunity records. Up to 300 per call.",
+  "method": "POST",
+  "path": "/rest/v1/opportunities.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/opportunities",
+  "permission": "Read-Write Opportunity",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": {
+      "mode": "sync",
+      "wrapper": "input",
+      "requiredFields": ["name"],
+      "maxPerCall": 300,
+      "hint": "One row per opportunity. name is required in every row; include externalOpportunityId (the CRM ID) for create, and marketoGUID or externalOpportunityId for update.",
+      "fixed": [
+        {
+          "name": "action",
+          "label": "Action",
+          "required": false,
+          "type": "select",
+          "placeholder": "createOrUpdate (default)",
+          "options": [
+            { "value": "createOnly", "label": "Create new only" },
+            { "value": "createOrUpdate", "label": "Create or update (default)" },
+            { "value": "updateOnly", "label": "Update existing only" }
+          ]
+        },
+        {
+          "name": "dedupeBy",
+          "label": "Match updates by",
+          "required": false,
+          "type": "select",
+          "placeholder": "dedupeFields (default)",
+          "options": [
+            { "value": "dedupeFields", "label": "externalOpportunityId (CRM ID) — default" },
+            { "value": "idField", "label": "marketoGUID (Marketo's own ID)" }
+          ],
+          "hint": "Only used when Action = updateOnly."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per row: marketoGUID, status (created/updated/failed), and the row sequence number."
+  },
+  "notes": [
+    "The name field must not be null — Marketo rejects rows without it.",
+    "There's no lookupField like on leads; matching uses externalOpportunityId or marketoGUID.",
+    "Requires SFDC or Dynamics Sync on the instance."
+  ]
+}

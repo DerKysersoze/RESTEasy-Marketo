@@ -1,0 +1,32 @@
+{
+  "id": "forms.fields",
+  "name": "Get Form Fields",
+  "group": "Forms",
+  "summary": "Lists the fields on a form in layout order \u2014 labels, data types, validation, visibility rules.",
+  "whenToUse": "When you want to see what a form asks, or the exact field API names.",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/{id}/fields.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Form ID",
+        "required": true,
+        "type": "integer",
+        "example": "736"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "The form's fields in layout order: id (API name), label, dataType, required, validation, visibility rules."
+  },
+  "notes": [
+    "The field id here is the name you pass when submitting leads to this form (Submit Lead Form)."
+  ]
+}

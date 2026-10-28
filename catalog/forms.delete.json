@@ -1,0 +1,34 @@
+{
+  "id": "forms.delete",
+  "name": "Delete Form",
+  "group": "Forms",
+  "summary": "Permanently deletes a form.",
+  "whenToUse": "When a form is no longer needed and nothing references it.",
+  "method": "POST",
+  "path": "/rest/asset/v1/form/{id}/delete.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Write Asset",
+  "confirm": "This permanently deletes the form. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Form ID",
+        "required": true,
+        "type": "integer",
+        "example": "736"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Deletion confirmation with the form ID."
+  },
+  "notes": [
+    "Marketo will refuse if the form is still in use by landing pages.",
+    "Unapprove the form first if it has a live (approved) version."
+  ]
+}

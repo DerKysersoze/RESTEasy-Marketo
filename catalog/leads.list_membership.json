@@ -1,0 +1,39 @@
+{
+  "id": "leads.list_membership",
+  "name": "Get Lists by Lead ID",
+  "group": "Leads",
+  "summary": "Shows every static list that a specific lead belongs to.",
+  "whenToUse": "When you want to know which static lists contain a given lead — useful for dedupe checks and membership audits.",
+  "method": "GET",
+  "path": "/rest/v1/leads/{id}/listMembership.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Lead ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The lead's numeric Marketo ID.",
+        "example": "123456"
+      }
+    ],
+    "query": [
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Maximum records per response (max 300). Leave blank for the default."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of lists: listId, createdAt, updatedAt."
+  },
+  "notes": []
+}

@@ -1,0 +1,20 @@
+{
+  "id": "lists.get",
+  "name": "Get Static Lists",
+  "group": "Static Lists",
+  "summary": "Lists the static lists in your instance with their IDs — the first step when you need a list ID for adding/removing leads.",
+  "whenToUse": "When you need to find the numeric ID of a static list (lists have human names in the UI but the API works with IDs).",
+  "method": "GET",
+  "path": "/rest/v1/lists.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/list-membership",
+  "permission": "Read-Only Lead",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "One entry per static list with its id, name, and creation info."
+  },
+  "notes": [
+    "Static lists are 'flat' lists you manage by hand — different from Smart Lists, which are filter-based."
+  ]
+}

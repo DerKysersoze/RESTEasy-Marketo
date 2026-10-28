@@ -1,0 +1,56 @@
+{
+  "id": "customobjects.delete",
+  "name": "Delete Custom Object Records",
+  "group": "Custom Objects",
+  "summary": "Permanently deletes records on a custom object type, matched by the object's dedupe field (default) or Marketo GUID. Up to 300 per call.",
+  "whenToUse": "When records on a custom object should be removed. There is no undo.",
+  "method": "POST",
+  "path": "/rest/v1/customobjects/{apiName}/delete.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/custom-objects",
+  "permission": "Read-Write Custom Object",
+  "confirm": "This PERMANENTLY deletes up to 300 records on this custom object type. This cannot be undone. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "apiName",
+        "label": "Object API name",
+        "required": true,
+        "type": "string",
+        "hint": "The object type's API name.",
+        "example": "car"
+      }
+    ],
+    "query": [],
+    "body": {
+      "mode": "values",
+      "key": "input",
+      "itemKey": "vin",
+      "type": "string",
+      "maxPerCall": 300,
+      "hint": "Comma-separated key values to delete — the object's dedupe field value (e.g. VINs). Adjust if your object's dedupe field has a different name (see Describe Custom Object).",
+      "example": "1H4FD1HS5AD123456, 1H4FD1HS5AD123457",
+      "fields": [
+        {
+          "name": "deleteBy",
+          "label": "Delete by",
+          "required": false,
+          "type": "select",
+          "placeholder": "dedupeFields (object's key field)",
+          "options": [
+            { "value": "dedupeFields", "label": "The object's dedupe field — default" },
+            { "value": "idField", "label": "marketoGUID (Marketo's own IDs)" }
+          ],
+          "hint": "If you switch to idField, paste marketoGUID values in the box instead."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per record: marketoGUID and status (deleted or skipped with a reason)."
+  },
+  "notes": [
+    "Deleting a record doesn't delete the lead it may be linked to."
+  ]
+}

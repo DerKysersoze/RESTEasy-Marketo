@@ -1,0 +1,52 @@
+{
+  "id": "snippets.by_id",
+  "name": "Get Snippet by ID",
+  "group": "Other Assets",
+  "summary": "Fetches one snippet's details using its ID.",
+  "whenToUse": "When you have a snippet ID and want its metadata.",
+  "method": "GET",
+  "path": "/rest/asset/v1/snippet/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/snippets",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Snippet ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Snippets.",
+        "example": "83"
+      }
+    ],
+    "query": [
+      {
+        "name": "status",
+        "label": "Version",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "approved",
+            "label": "Approved"
+          },
+          {
+            "value": "draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "Auto (default)",
+        "hint": "Return the approved or draft version."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The snippet record."
+  },
+  "notes": [
+    "There is no by-name lookup for snippets \u2014 use List Snippets to find the ID."
+  ]
+}

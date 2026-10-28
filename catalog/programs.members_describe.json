@@ -1,0 +1,20 @@
+{
+  "id": "programs.members_describe",
+  "name": "Describe Program Member",
+  "group": "Programs",
+  "summary": "Shows the program member object: its key fields (leadId, programId, statusName…) and which fields can be filtered or updated.",
+  "whenToUse": "Before working with program members — to see the available fields and the valid filter fields for Get Program Members.",
+  "method": "GET",
+  "path": "/rest/v1/programs/members/describe.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/program-members",
+  "permission": "Read-Only Lead",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Object metadata: dedupeFields, searchableFields, and a fields list with updateable flags."
+  },
+  "notes": [
+    "The 'updateable' flag on each field tells you what you can write with Sync Program Member Data."
+  ]
+}

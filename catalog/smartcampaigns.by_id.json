@@ -1,0 +1,31 @@
+{
+  "id": "smartcampaigns.by_id",
+  "name": "Get Smart Campaign by ID",
+  "group": "Lists & Campaigns",
+  "summary": "Fetches one smart campaign's details using its ID.",
+  "whenToUse": "When you have a campaign ID and want its status, type, and smart list.",
+  "method": "GET",
+  "path": "/rest/asset/v1/smartCampaign/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-campaigns",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Smart Campaign ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Smart Campaigns.",
+        "example": "1001"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The full campaign record, including its smartListId and activation state."
+  },
+  "notes": []
+}

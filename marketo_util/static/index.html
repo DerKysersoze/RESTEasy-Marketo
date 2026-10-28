@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marketo REST Utility</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%230f62fe'/></svg>">
+  <script>
+    // Set the theme before first paint to avoid a flash of the wrong theme.
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("marketo.theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") {
+        t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span> Marketo REST Utility</div>
+    <div class="top-actions">
+      <button id="btn-home" class="ghost" title="Back to the main menu">🏠 Home</button>
+      <select id="profile-select" title="Active Marketo connection"></select>
+      <button id="btn-manage" class="ghost">Manage connections</button>
+      <button id="btn-settings" class="ghost" title="Settings: where things are saved, call logging, error codes">⚙️ Settings</button>
+      <button id="btn-theme" class="ghost" type="button" aria-pressed="false" title="Switch to dark mode"><span class="t-ic">🌙</span></button>
+    </div>
+  </header>
+
+  <!-- ================= HOME — task hub ================= -->
+  <div id="view-home" class="view">
+    <section class="hero">
+      <h1>What do you want to do?</h1>
+      <p>Pick a goal and we'll take you to the right call — or search for the thing you're after.</p>
+      <div class="searchwrap">
+        <span class="ic">🔍</span>
+        <input id="home-search" type="search" placeholder="Try “lead email”, “program status”, “send sample”…" autocomplete="off">
+        <div id="home-results" class="home-results hidden" role="listbox"></div>
+      </div>
+      <div class="hintline">
+        Popular:
+        <b data-q="lead email">Get leads by email</b><span class="sep">·</span>
+        <b data-q="program member">Who's in a program?</b><span class="sep">·</span>
+        <b data-q="extract leads">Export a list to CSV</b><span class="sep">·</span>
+        <b data-q="sample email">Test an email</b>
+      </div>
+    </section>
+
+    <section class="tasks" id="tasks" aria-label="Tasks"></section>
+
+    <section class="recent hidden" id="recent-section">
+      <h2>Recently run (this connection)</h2>
+      <div class="chips" id="recent-chips"></div>
+    </section>
+
+    <section class="browse">
+      <div class="browse-in">
+        <div class="txt">
+          <b>Don't see your task?</b>
+          <span>Browse the full catalog — every call, grouped by object.</span>
+        </div>
+        <button id="btn-browse" class="primary">Browse all calls →</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= BROWSE — full catalog ================= -->
+  <div id="view-browse" class="view hidden">
+    <div class="pagehead">
+      <div>
+        <h1>Browse API calls</h1>
+        <p>Every call Marketo exposes, in plain English — what it does and when to reach for it.</p>
+      </div>
+      <div class="searchwrap browse-searchwrap">
+        <span class="ic">🔍</span>
+        <input id="browse-search" type="search" placeholder="Search calls — e.g. “lead email”, “program status”…" autocomplete="off">
+      </div>
+    </div>
+    <nav class="tabs" id="browse-tabs" aria-label="Groups"></nav>
+    <div class="gridwrap" id="browse-grid"></div>
+  </div>
+
+  <!-- ================= DETAIL — call form / bulk wizard (unchanged) ================= -->
+  <div id="view-detail" class="view hidden">
+    <div class="main">
+      <div id="call-detail"></div>
+      <div id="response"></div>
+    </div>
+  </div>
+
+  <!-- Manage connections modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Manage connections">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Marketo connections</h2>
+        <button class="ghost" data-close>Close</button>
+      </div>
+
+      <div id="profile-table" class="profile-table"></div>
+
+      <hr>
+
+      <h3 id="pf-title">Add a connection</h3>
+      <p class="muted small">
+        Find your credentials in Marketo <b>Admin Center → Integrations → API Keys &amp;
+        Access Tokens</b> (REST API key and secret). The instance name looks like
+        <code>100-AEK-913</code>.
+      </p>
+      <div class="form-grid" id="profile-form">
+        <label>Name <input id="pf-name" placeholder="e.g. Production"></label>
+        <label>Instance <input id="pf-instance" placeholder="e.g. 100-AEK-913"></label>
+        <label>Client ID <input id="pf-clientid" placeholder="e.g. abcd-efgh-1234"></label>
+        <label>Client secret <input id="pf-secret" type="password" placeholder="••••••••"></label>
+      </div>
+      <div class="modal-actions">
+        <button id="pf-save" class="primary">Save</button>
+        <button id="pf-cancel-edit" class="ghost hidden">Cancel edit</button>
+        <button id="pf-test" class="ghost">Test connection</button>
+        <span id="pf-status" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal (P8) -->
+  <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Settings</h2>
+        <button class="ghost" id="settings-close">Close</button>
+      </div>
+
+      <div class="set-section">
+        <label class="set-label" for="set-dir">Where calls &amp; returns are saved</label>
+        <p class="set-hint">Every logged call — and, if enabled below, each bulk export file — is written to this folder.</p>
+        <div class="set-row">
+          <input id="set-dir" type="text" placeholder="e.g. C:\\Exports\\marketo" autocomplete="off" spellcheck="false">
+          <button id="set-dir-test" class="ghost" type="button">Test</button>
+          <button id="set-dir-default" class="ghost" type="button">Use default</button>
+        </div>
+        <div id="set-dir-status" class="muted small"></div>
+      </div>
+
+      <div class="set-section">
+        <label class="set-check">
+          <input id="set-log" type="checkbox">
+          <span><b>Log every call + Marketo response</b>
+            <small class="block">Appends each call to a daily file&nbsp;<code>marketo-calls-YYYY-MM-DD.jsonl</code> in the folder above. Off by default.</small></span>
+        </label>
+      </div>
+
+      <div class="set-section">
+        <label class="set-check">
+          <input id="set-bulk" type="checkbox">
+          <span><b>Also save bulk export files here</b>
+            <small class="block">When you download a bulk CSV, keep a copy in the folder above (instead of only your browser's Downloads).</small></span>
+        </label>
+      </div>
+
+      <div class="set-section">
+        <label class="set-label">Error codes</label>
+        <p class="set-hint">When a Marketo response carries an error code, the tool shows the official meaning plus a link to the <a id="set-doc-link" href="https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/error-codes" target="_blank" rel="noopener">Marketo error-codes reference</a>.</p>
+        <button id="set-clear-log" class="ghost" type="button">Clear saved call logs</button>
+        <div id="set-clear-status" class="muted small"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="set-save" class="primary">Save settings</button>
+        <span id="set-status" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

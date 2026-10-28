@@ -1,0 +1,43 @@
+{
+  "id": "leads.associate",
+  "name": "Associate Lead (cookie)",
+  "group": "Leads",
+  "summary": "Attaches a Munchkin tracking cookie (_mkto_trk) to a known lead, so prior anonymous web activity links to that person.",
+  "whenToUse": "When a lead was created without their browsing history and you have their mkt_tok/cookie value (e.g. from a landing page URL or email click).",
+  "method": "POST",
+  "path": "/rest/v1/leads/{id}/associate.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Lead ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The known lead to attach the cookie to.",
+        "example": "123456"
+      }
+    ],
+    "query": [
+      {
+        "name": "cookie",
+        "label": "Cookie value",
+        "required": true,
+        "type": "string",
+        "hint": "The _mkto_trk cookie, in the form id:…&token:_mch-… (URL-encode the & and : if your browser mangles them).",
+        "example": "id:100-AEK-913&token:_mch-marketo.com-1594662-102"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Success flag only."
+  },
+  "notes": [
+    "If the cookie is already attached to another known lead, new activity goes to this lead but old activity stays with the other one.",
+    "Tip: Marketo's own Push Lead call (above) can do this for you via the mktToken field."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "smartcampaigns.by_name",
+  "name": "Get Smart Campaign by Name",
+  "group": "Lists & Campaigns",
+  "summary": "Finds a smart campaign by its exact name.",
+  "whenToUse": "When you know the campaign's name but not its ID.",
+  "method": "GET",
+  "path": "/rest/asset/v1/smartCampaign/byName.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-campaigns",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "name",
+        "label": "Campaign name",
+        "required": true,
+        "type": "string",
+        "example": "Process Bounced Emails"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The matching campaign record."
+  },
+  "notes": []
+}

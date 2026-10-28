@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Local data & logs
+marketo_util.db
+*.log
+e2e_tmp/
+
+# Dev artifacts (not needed to run or ship the app)
+scratch/
+mockups/
+
+# Build output (the spec file itself IS committed — CI builds from it)
+build/
+dist/

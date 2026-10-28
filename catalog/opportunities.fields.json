@@ -1,0 +1,37 @@
+{
+  "id": "opportunities.fields",
+  "name": "Get Opportunity Fields",
+  "group": "Opportunities",
+  "summary": "Lists all fields on the Opportunity object (standard + custom) with API names and data types. Paged, 300 per page.",
+  "whenToUse": "When you need the exact field API names to request in Get Opportunities or to write with Sync Opportunities.",
+  "method": "GET",
+  "path": "/rest/v1/opportunities/schema/fields.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/opportunities",
+  "permission": "Read-Write Schema Custom Field",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Max 300."
+      },
+      {
+        "name": "nextPageToken",
+        "label": "Next page token",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Copy nextPageToken from the previous response to continue."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Field metadata: name, displayName, dataType, isCustom, and more."
+  },
+  "notes": []
+}

@@ -1,0 +1,34 @@
+{
+  "id": "forms.approve",
+  "name": "Approve Form",
+  "group": "Forms",
+  "summary": "Publishes a form's current draft as the live (approved) version.",
+  "whenToUse": "After editing a form's draft, to make the changes live.",
+  "method": "POST",
+  "path": "/rest/asset/v1/form/{id}/approveDraft.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Write Asset",
+  "confirm": "Approving publishes the current draft as the live version \u2014 it replaces the previously approved version. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Form ID",
+        "required": true,
+        "type": "integer",
+        "example": "736"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The approved form record."
+  },
+  "notes": [
+    "Only a form that has a draft can be approved.",
+    "Marketo docs: 'Approving a form replaces the existing approved version, if any, with the current draft.'"
+  ]
+}

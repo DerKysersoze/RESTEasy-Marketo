@@ -1,0 +1,33 @@
+{
+  "id": "forms.by_id",
+  "name": "Get Form by ID",
+  "group": "Forms",
+  "summary": "Fetches one form's details using its ID.",
+  "whenToUse": "When you have a form ID and want its properties (status, folder, button label, \u2026).",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Form ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Forms.",
+        "example": "736"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "All form properties except the field list."
+  },
+  "notes": [
+    "Get the fields separately with 'Get Form Fields'."
+  ]
+}

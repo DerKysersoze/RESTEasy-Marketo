@@ -1,0 +1,31 @@
+{
+  "id": "programs.by_id",
+  "name": "Get Program by ID",
+  "group": "Programs",
+  "summary": "Fetches one program's details (name, status, approval state) using its ID.",
+  "whenToUse": "When you have a program ID and want to confirm which program it is.",
+  "method": "GET",
+  "path": "/rest/asset/v1/program/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/endpoint-reference",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Programs.",
+        "example": "55"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The program's name, status, and metadata."
+  },
+  "notes": []
+}

@@ -1,0 +1,38 @@
+{
+  "id": "emails.by_name",
+  "name": "Get Email by Name",
+  "group": "Emails",
+  "summary": "Finds an email by its exact name, optionally limited to a folder.",
+  "whenToUse": "When you know the email's name but not its ID.",
+  "method": "GET",
+  "path": "/rest/asset/v1/email/byName.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/emails",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "name",
+        "label": "Email name",
+        "required": true,
+        "type": "string",
+        "example": "Promo October"
+      },
+      {
+        "name": "folder",
+        "label": "Folder",
+        "required": false,
+        "type": "json",
+        "example": "{\"id\":1056,\"type\":\"Folder\"}",
+        "hint": "Limit the search to one folder (JSON object with id and type)."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The matching email record, or an error if the name doesn't exist."
+  },
+  "notes": []
+}

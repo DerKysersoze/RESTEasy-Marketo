@@ -1,0 +1,91 @@
+{
+  "id": "bulk.extract_leads",
+  "name": "Extract leads (bulk)",
+  "group": "Bulk Extract",
+  "kind": "extract",
+  "summary": "Export a large set of leads to a CSV/TSV/SSV file. Pick the fields, choose one filter (static/smart list or a date range), start the job, then download the file when it finishes.",
+  "whenToUse": "You need more than 1,000 leads, or a one-off export of a whole list/date range. Normal 'Get leads' calls stop at 1,000 matches (error 1003).",
+  "permission": "Read-Only Lead (or higher)",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/bulk-extract/bulk-lead-extract",
+  "notes": [
+    "Jobs run asynchronously — the file is usually ready within minutes. You can keep using the app; check back in Job history.",
+    "Date-range filters must span 31 days or fewer.",
+    "updatedAt and smart-list filters may be unavailable on some subscriptions (error 1035 if yours is).",
+    "Export files are kept by Marketo for 10 days.",
+    "Marketo runs at most 2 bulk jobs at a time (10 in the queue) — error 1016 means the queue is full; wait and retry.",
+    "Empty values come back as null in the file."
+  ],
+  "create": {
+    "method": "POST",
+    "path": "/bulk/v1/leads/export/create.json"
+  },
+  "enqueue": { "method": "POST", "path": "/bulk/v1/leads/export/{jobId}/enqueue.json" },
+  "status":  { "method": "GET",  "path": "/bulk/v1/leads/export/{jobId}/status.json" },
+  "file":    { "method": "GET",  "path": "/bulk/v1/leads/export/{jobId}/file.json" },
+  "cancel":  { "method": "POST", "path": "/bulk/v1/leads/export/{jobId}/cancel.json" },
+  "resultId": "exportId",
+  "form": [
+    {
+      "name": "filterType",
+      "label": "Which leads?",
+      "type": "select",
+      "required": true,
+      "hint": "One filter per job. Pick a list or a date range.",
+      "options": [
+        { "value": "staticListId",   "label": "Static list (by ID)" },
+        { "value": "staticListName", "label": "Static list (by name)" },
+        { "value": "smartListId",    "label": "Smart list (by ID) — some subscriptions only" },
+        { "value": "smartListName",  "label": "Smart list (by name) — some subscriptions only" },
+        { "value": "createdAt",      "label": "Leads created between two dates" },
+        { "value": "updatedAt",      "label": "Leads last updated between two dates — some subscriptions only" }
+      ],
+      "dynamicFields": {
+        "staticListId":   [
+          { "name": "listId", "label": "Static list ID", "type": "integer", "required": true, "hint": "Find IDs in the 'Static Lists' group (List static lists)." }
+        ],
+        "staticListName": [
+          { "name": "listName", "label": "Static list name (exact)", "type": "string", "required": true, "hint": "Must match the list name exactly as shown in Marketo." }
+        ],
+        "smartListId": [
+          { "name": "listId", "label": "Smart list ID", "type": "integer", "required": true, "hint": "Find IDs in the 'Lists & Campaigns' group (List smart lists)." }
+        ],
+        "smartListName": [
+          { "name": "listName", "label": "Smart list name (exact)", "type": "string", "required": true, "hint": "Must match the smart list name exactly." }
+        ],
+        "createdAt": [
+          { "name": "startAt", "label": "From (date & time)", "type": "datetime", "required": true, "hint": "ISO format, e.g. 2026-01-01T00:00:00Z — no milliseconds." },
+          { "name": "endAt",   "label": "To (date & time)",   "type": "datetime", "required": true, "hint": "The range must be 31 days or fewer." }
+        ],
+        "updatedAt": [
+          { "name": "startAt", "label": "From (date & time)", "type": "datetime", "required": true, "hint": "ISO format, e.g. 2026-01-01T00:00:00Z — no milliseconds." },
+          { "name": "endAt",   "label": "To (date & time)",   "type": "datetime", "required": true, "hint": "The range must be 31 days or fewer." }
+        ]
+      }
+    },
+    {
+      "name": "fields",
+      "label": "Fields to export",
+      "type": "lookup",
+      "source": "describe",
+      "required": true,
+      "hint": "Tick the columns you want in the file. At least one is required — the REST API name is used as the column header."
+    },
+    {
+      "name": "format",
+      "label": "File format",
+      "type": "select",
+      "placeholder": "CSV (default)",
+      "options": [
+        { "value": "CSV", "label": "CSV — comma-separated" },
+        { "value": "TSV", "label": "TSV — tab-separated" },
+        { "value": "SSV", "label": "SSV — space-separated" }
+      ]
+    },
+    {
+      "name": "columnHeaderNames",
+      "label": "Rename column headers (advanced)",
+      "type": "json",
+      "hint": "Optional JSON object mapping a field API name to a friendlier header. Example: {\"email\": \"Email Address\", \"id\": \"Marketo Id\"}"
+    }
+  ]
+}

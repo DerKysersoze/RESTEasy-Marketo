@@ -1,0 +1,52 @@
+{
+  "id": "leads.get_by_id",
+  "name": "Get Lead by ID",
+  "group": "Leads",
+  "summary": "Fetches a single lead's data using their Marketo ID. You can optionally restrict which fields come back.",
+  "whenToUse": "When you know the lead's numeric Marketo ID (from a landing page URL, an email link, or another call) and want that person's current field values.",
+  "method": "GET",
+  "path": "/rest/v1/lead/{id}.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Lead ID",
+        "required": true,
+        "type": "integer",
+        "hint": "The lead's numeric Marketo ID. If you only know their email, use 'Get Leads by Filter Type' instead.",
+        "example": "123456"
+      }
+    ],
+    "query": [
+      {
+        "name": "lookupToken",
+        "label": "Lookup token (instead of ID)",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. The lead's lookup token — a random string Marketo assigns, often seen in landing page URLs.",
+        "example": "aBc123-xyZ"
+      },
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "lookup",
+        "source": "describe",
+        "hint": "Pick which fields to include. If you pick none, Marketo returns only the basics: id, email, first name, last name, and created/updated dates."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "One lead object, keyed by field name, e.g. {\"id\": 123456, \"email\": \"…\", \"firstName\": \"…\"}."
+  },
+  "notes": [
+    "Returns 404 if no lead matches the ID or token.",
+    "With no fields selected, only id, email, firstName, lastName, createdAt, updatedAt come back — pick fields for a fuller record.",
+    "Lead IDs are per-instance — a lead's ID in one Marketo instance is meaningless in another."
+  ]
+}

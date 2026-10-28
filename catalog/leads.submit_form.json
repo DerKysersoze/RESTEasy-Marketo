@@ -1,0 +1,30 @@
+{
+  "id": "leads.submit_form",
+  "name": "Submit Form",
+  "group": "Leads",
+  "summary": "Replays a Marketo form submission: upserts the lead, creates a 'Fill out Form' activity, and can start workflows — useful for testing forms or feeding them from another system.",
+  "whenToUse": "When you want to simulate a person filling out a specific Marketo form (by form ID), optionally attributed to a program.",
+  "method": "POST",
+  "path": "/rest/v1/leads/submitForm.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Write Lead",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": {
+      "mode": "freeform",
+      "example": "{\n  \"formId\": 1029,\n  \"programId\": 55,\n  \"input\": [\n    {\n      \"leadFormFields\": {\n        \"firstName\": \"Marge\",\n        \"lastName\": \"Simpson\",\n        \"email\": \"marge.simpson@fox.com\"\n      },\n      \"visitorData\": {\n        \"pageURL\": \"https://example.com/thankyou\",\n        \"userAgentString\": \"Mozilla/5.0\"\n      },\n      \"cookie\": \"id:100-AEK-913&token:_mch-marketo.com-1594662-102\"\n    }\n  ]\n}",
+      "hint": "formId is required. Inside leadFormFields use the form field REST API names — email is required. Drop programId, visitorData, or cookie lines you don't need."
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": false,
+    "description": "The lead ID and whether the record was created or updated."
+  },
+  "notes": [
+    "The lead is matched/created by email (the form's primary key).",
+    "If the form belongs to a program, the lead is added to it; you can also pass programId explicitly.",
+    "Field names in leadFormFields must be defined in the form — check the form's fields in Marketo or via the Forms API (Phase 3)."
+  ]
+}

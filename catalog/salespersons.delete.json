@@ -1,0 +1,45 @@
+{
+  "id": "salespersons.delete",
+  "name": "Delete Sales Persons",
+  "group": "Sales Persons",
+  "summary": "Permanently deletes sales person records, matched by externalSalesPersonId (default) or Marketo ID. Up to 300 per call.",
+  "whenToUse": "Rarely — to clean up rep records that should no longer exist in Marketo. There is no undo.",
+  "method": "POST",
+  "path": "/rest/v1/salespersons/delete.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/sales-persons",
+  "permission": "Read-Write Sales Person",
+  "confirm": "This PERMANENTLY deletes up to 300 sales person records. Leads/opportunities that referenced them keep their externalSalesPersonId value, but the rep record is gone. Continue?",
+  "params": {
+    "path": [],
+    "query": [],
+    "body": {
+      "mode": "values",
+      "key": "input",
+      "itemKey": "externalSalesPersonId",
+      "type": "string",
+      "maxPerCall": 300,
+      "hint": "Comma-separated external IDs to delete — usually the rep's email.",
+      "example": "sam@test.com, david@test.com",
+      "fields": [
+        {
+          "name": "deleteBy",
+          "label": "Delete by",
+          "required": false,
+          "type": "select",
+          "placeholder": "dedupeFields (externalSalesPersonId)",
+          "options": [
+            { "value": "dedupeFields", "label": "externalSalesPersonId — default" },
+            { "value": "idField", "label": "id (Marketo's own ID)" }
+          ],
+          "hint": "If you switch to idField, paste Marketo IDs in the values box instead. Each record may contain only the one matching key."
+        }
+      ]
+    }
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Per record: status and reason when skipped."
+  },
+  "notes": []
+}

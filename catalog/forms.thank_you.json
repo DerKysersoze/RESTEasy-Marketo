@@ -1,0 +1,48 @@
+{
+  "id": "forms.thank_you",
+  "name": "Get Form Thank You Page",
+  "group": "Forms",
+  "summary": "Returns the thank-you page configuration for a form (what happens after submission).",
+  "whenToUse": "When you want to know where a form sends people after they submit.",
+  "method": "GET",
+  "path": "/rest/asset/v1/form/{id}/thankYouPage.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Form ID",
+        "required": true,
+        "type": "integer",
+        "example": "736"
+      }
+    ],
+    "query": [
+      {
+        "name": "status",
+        "label": "Version",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "approved",
+            "label": "Approved"
+          },
+          {
+            "value": "draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "Auto (default)"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "The thank-you configuration (thankYouList): follow-up type and value, plus the default."
+  },
+  "notes": []
+}

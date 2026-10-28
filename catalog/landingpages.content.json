@@ -1,0 +1,33 @@
+{
+  "id": "landingpages.content",
+  "name": "Get Landing Page Content",
+  "group": "Landing Pages",
+  "summary": "Lists the page's content sections (forms, images, text, snippets) in order.",
+  "whenToUse": "When you want to see what is on a landing page and where each piece sits.",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPage/{id}/content.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-pages",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Landing Page ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via List Landing Pages.",
+        "example": "1234"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Content sections in layout order: type (Form, Image, RichText, Snippet, \u2026), index, and content."
+  },
+  "notes": [
+    "A section must appear in this list before it can be updated via the content-update endpoints."
+  ]
+}

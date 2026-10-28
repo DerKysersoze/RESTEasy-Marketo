@@ -1,0 +1,62 @@
+{
+  "id": "forms.list",
+  "name": "List Forms",
+  "group": "Forms",
+  "summary": "Browses the forms in your Marketo instance \u2014 name, status, folder, theme.",
+  "whenToUse": "When you need to find a form's ID or see which forms exist.",
+  "method": "GET",
+  "path": "/rest/asset/v1/forms.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/forms",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "status",
+        "label": "Status",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "approved",
+            "label": "Approved"
+          },
+          {
+            "value": "approved with draft",
+            "label": "Approved with draft"
+          },
+          {
+            "value": "draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "All (default)"
+      },
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "How many forms to return (with offset to page).",
+        "example": "50"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging. Default 0.",
+        "example": "20"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Form records: id, name, status, folder, theme, \u2026 (field lists are NOT included)."
+  },
+  "notes": [
+    "The list response omits each form's fields \u2014 use 'Get Form Fields' for those."
+  ]
+}

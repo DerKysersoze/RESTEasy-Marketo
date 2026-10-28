@@ -1,0 +1,73 @@
+{
+  "id": "programs.members",
+  "name": "Get Program Members",
+  "group": "Programs",
+  "summary": "Lists the members of a program, filterable by status, lead ID, or any program member field. Supports paging.",
+  "whenToUse": "When you want to see who's in a program and at what status — or export that audience.",
+  "method": "GET",
+  "path": "/rest/v1/programs/{programId}/members.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/program-members",
+  "permission": "Read-Only Lead",
+  "params": {
+    "path": [
+      {
+        "name": "programId",
+        "label": "Program ID",
+        "required": true,
+        "type": "integer",
+        "hint": "Find it via Get Programs.",
+        "example": "55"
+      }
+    ],
+    "query": [
+      {
+        "name": "filterType",
+        "label": "Filter on",
+        "required": true,
+        "type": "string",
+        "hint": "What to filter by: leadId, statusName, reachedSuccess, or one of the program's custom fields.",
+        "example": "statusName"
+      },
+      {
+        "name": "filterValues",
+        "label": "Filter value(s)",
+        "required": true,
+        "type": "csv",
+        "hint": "Comma-separated values. Max 300. E.g. the status name (Member, Influenced, …) or lead IDs.",
+        "example": "Influenced"
+      },
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "string",
+        "hint": "Optional comma-separated field API names to include. See 'Get Program Member Fields' for the list.",
+        "example": "leadId,statusName,registrationCode"
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Max 300."
+      },
+      {
+        "name": "nextPageToken",
+        "label": "Next page token",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Copy nextPageToken from the previous response to get the next page."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Program member records (leadId, statusName, membershipDate, custom fields, …)."
+  },
+  "notes": [
+    "Programs with more than 100,000 members can't be queried this way (error 1003) — use a Bulk Program Member Extract (Phase 4) instead.",
+    "Status names are per-program (defined by the program's channel) — e.g. Member, Influenced, Completed."
+  ]
+}

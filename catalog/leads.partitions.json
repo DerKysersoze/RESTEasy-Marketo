@@ -1,0 +1,18 @@
+{
+  "id": "leads.partitions",
+  "name": "Get Lead Partitions",
+  "group": "Leads",
+  "summary": "Lists the lead partitions available in your Marketo instance, and which one is the default.",
+  "whenToUse": "When you need to know what partitions exist (e.g. for multi-partition setups) or to check the default partition before pushing leads.",
+  "method": "GET",
+  "path": "/rest/v1/leads/partitions.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/leads",
+  "permission": "Read-Only Lead",
+  "params": { "path": [], "query": [], "body": null },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Array of partitions: name and whether it is the default."
+  },
+  "notes": []
+}

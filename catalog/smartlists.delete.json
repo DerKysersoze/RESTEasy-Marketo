@@ -1,0 +1,31 @@
+{
+  "id": "smartlists.delete",
+  "name": "Delete Smart List",
+  "group": "Lists & Campaigns",
+  "summary": "Permanently deletes a smart list.",
+  "whenToUse": "When a smart list is no longer needed.",
+  "method": "POST",
+  "path": "/rest/asset/v1/smartList/{id}/delete.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/smart-lists",
+  "permission": "Read-Write Asset",
+  "confirm": "This permanently deletes the smart list. Continue?",
+  "params": {
+    "path": [
+      {
+        "name": "id",
+        "label": "Smart List ID",
+        "required": true,
+        "type": "integer",
+        "example": "788645"
+      }
+    ],
+    "query": [],
+    "body": null
+  },
+  "response": {
+    "shape": "object",
+    "exportable": false,
+    "description": "Deletion confirmation with the list ID."
+  },
+  "notes": []
+}

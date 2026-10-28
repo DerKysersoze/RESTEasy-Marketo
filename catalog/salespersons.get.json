@@ -1,0 +1,67 @@
+{
+  "id": "salespersons.get",
+  "name": "Get Sales Persons",
+  "group": "Sales Persons",
+  "summary": "Fetches sales person records by their external ID (usually their email), Marketo ID, or email.",
+  "whenToUse": "When you want to look up a rep's Marketo ID (externalSalesPersonId is often their email) or their synced profile data.",
+  "method": "GET",
+  "path": "/rest/v1/salespersons.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/lead-database/sales-persons",
+  "permission": "Read-Only Sales Person",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "filterType",
+        "label": "Look up by",
+        "required": true,
+        "type": "select",
+        "options": [
+          { "value": "dedupeFields", "label": "externalSalesPersonId (CRM ID — often their email)" },
+          { "value": "idField", "label": "Marketo ID" },
+          { "value": "email", "label": "Email" },
+          { "value": "id", "label": "Marketo ID (id)" }
+        ],
+        "hint": "Which field the values below match on."
+      },
+      {
+        "name": "filterValues",
+        "label": "Value(s)",
+        "required": true,
+        "type": "csv",
+        "hint": "Comma-separated values — e.g. david@test.com, sam@test.com",
+        "example": "david@test.com, sam@test.com"
+      },
+      {
+        "name": "fields",
+        "label": "Fields to return",
+        "required": false,
+        "type": "string",
+        "hint": "Optional comma-separated field API names. If omitted, all populated fields come back."
+      },
+      {
+        "name": "batchSize",
+        "label": "Batch size (max per page)",
+        "required": false,
+        "type": "integer",
+        "hint": "Optional. Max 300."
+      },
+      {
+        "name": "nextPageToken",
+        "label": "Next page token",
+        "required": false,
+        "type": "string",
+        "hint": "Optional. Copy nextPageToken from the previous response to continue."
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Sales person records (id, externalSalesPersonId, email, name fields, dates)."
+  },
+  "notes": [
+    "Requires SFDC or Dynamics Sync on the instance — sales person records come from the CRM."
+  ]
+}

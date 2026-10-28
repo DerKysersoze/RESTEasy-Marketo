@@ -1,0 +1,59 @@
+{
+  "id": "landingpages.list",
+  "name": "List Landing Pages",
+  "group": "Landing Pages",
+  "summary": "Browses the landing pages in your Marketo instance \u2014 name, ID, folder, status, and URL.",
+  "whenToUse": "When you need to find a landing page's ID or see which pages exist (and their approval status).",
+  "method": "GET",
+  "path": "/rest/asset/v1/landingPages.json",
+  "docUrl": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/rest/assets/landing-pages",
+  "permission": "Read-Only Asset",
+  "params": {
+    "path": [],
+    "query": [
+      {
+        "name": "status",
+        "label": "Status",
+        "required": false,
+        "type": "select",
+        "options": [
+          {
+            "value": "Approved",
+            "label": "Approved"
+          },
+          {
+            "value": "Draft",
+            "label": "Draft"
+          }
+        ],
+        "placeholder": "All (no filter)",
+        "hint": "Only approved pages, or only drafts."
+      },
+      {
+        "name": "maxReturn",
+        "label": "Max to return",
+        "required": false,
+        "type": "integer",
+        "hint": "How many pages to return. Default 20, maximum 200.",
+        "example": "100"
+      },
+      {
+        "name": "offset",
+        "label": "Offset",
+        "required": false,
+        "type": "integer",
+        "hint": "Start here when paging (with 'Max to return'). Default 0.",
+        "example": "20"
+      }
+    ],
+    "body": null
+  },
+  "response": {
+    "shape": "array",
+    "exportable": true,
+    "description": "Landing page records: id, name, status, folder, URL, template, workspace, \u2026"
+  },
+  "notes": [
+    "Standard Asset API browse pattern (status / maxReturn / offset), as documented on the Emails and Smart Campaigns pages."
+  ]
+}
