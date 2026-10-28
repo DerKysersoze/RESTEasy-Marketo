@@ -10,6 +10,16 @@ as pretty JSON or CSV — no JSON crafting, no token juggling.
 > leads, activities, assets, programs, opportunities, and bulk data. For
 > reports, use the Marketo UI export or the SOAP reporting API.
 
+## Screenshots
+
+| Home — task cards, lead field library, recent calls | Any call becomes a friendly form |
+|---|---|
+| ![](docs/screenshots/home-dark.png) | ![](docs/screenshots/call-form-dark.png) |
+
+| Browse the full catalog of calls | Manage your Marketo connections |
+|---|---|
+| ![](docs/screenshots/browse-dark.png) | ![](docs/screenshots/connections-dark.png) |
+
 ## Download & run (no Python needed)
 
 Get the latest build from the [Releases page](../../releases/latest):
