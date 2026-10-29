@@ -17,6 +17,11 @@ e2e_tmp/
 scratch/
 mockups/
 
+# Internal dev notes (kept locally, not published with the repo)
+PLAN.md
+NOTES.md
+DARK-MODE-PLAN.md
+
 # Build output (the spec file itself IS committed — CI builds from it)
 build/
 dist/
