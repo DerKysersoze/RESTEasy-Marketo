@@ -73,12 +73,19 @@ python run.py
 
 1. Click **Manage connections** (top-right).
 2. Add your **instance** (e.g. `100-AEK-913`), **client ID**, and **client
-   secret** — found in Marketo *Admin Center → Integrations → API Keys &
-   Access Tokens*.
-3. Click **Test connection**, then pick a task on the home page (or search for
-   a call — try *Describe Leads*, it needs no fields) and hit **Run call**.
+   secret** — found in Marketo *Admin → Integration → Web Services* (REST API
+   section, for your API-only user's custom service).
+3. Click **Test connection** — the dialog also shows the **access-token
+   status** for the active connection (when it was fetched, when it expires,
+   its scope, and a masked token). Tokens last **1 hour** and are refreshed
+   automatically, including when Marketo answers 601 (invalid) or 602
+   (expired) — the app fetches a fresh one and retries once.
+   If the test fails with `invalid_client`, the saved secret was likely
+   regenerated in Marketo — get the current one and update the connection.
+4. Pick a task on the home page (or search for a call — try *Describe Leads*,
+   it needs no fields) and hit **Run call**.
    “Browse all calls” opens the full catalog, grouped by object.
-4. **Appearance:** toggle dark mode with the 🌙 button in the top bar — your choice
+5. **Appearance:** toggle dark mode with the 🌙 button in the top bar — your choice
    is remembered in this browser (first visit follows your OS setting).
 
 Your connection is stored locally, per platform:
@@ -95,8 +102,9 @@ Your connection is stored locally, per platform:
   Manager, macOS Keychain, or Linux Secret Service) when one is available;
   otherwise it falls back to the database above. Deleting a connection also
   removes the credential-manager entry.
-- **OAuth access token** — in memory only (20-minute token, auto-refreshed);
-  never written to disk.
+- **OAuth access token** — in memory only (1-hour token, auto-refreshed 2
+  minutes before expiry, and on Marketo 601/602 responses); never written to
+  disk, and only ever shown **masked** in the Manage-connections dialog.
 - **Munchkin ID / cookie** — never stored anywhere; it's only ever entered
   as input to the *Associate Lead (cookie)* call.
 
@@ -109,10 +117,25 @@ So you never have to type lead-field names from memory:
   every field for that connection, and tags each as **custom** (your team's
   field) or **system** (Marketo standard), with a **read-only** chip where it
   applies.
+- **View all fields** (same card, or search "field" on the home page) opens the
+  full saved library in its own view — no API call to open. Search by name,
+  label, or type; filter **All / Custom only / System only**; see each field's
+  API name, data type, description, and a **Copy** button so you can paste the
+  name into any call. **⧉ Copy CSV** copies the fields currently shown (after
+  your filter/search) as CSV — header + one row per field, with the custom /
+  read-only tags — ready for Excel, Sheets, or any tool. Refresh from Marketo
+  re-syncs the list in place.
+- **The call page is a two-pane workspace:** the form fills the left pane and
+  the response lands in the right pane (sticky, full height) — no scrolling down
+  for results. **Drag the divider** between the panes to resize them (the
+  response pane can grow to 75% of the window; double-click the divider to
+  reset, or focus it and use the arrow keys). Your split is remembered.
 - Any call that accepts lead fields (e.g. *Get Lead by ID → fields to return*,
   *Sync Leads* columns) then shows a **picker**: tick the fields you want, filter
-  **All / Custom only / System only**, and custom fields sort to the top. The
-  picker loads from the stored library — no extra API call after the first load.
+  **All / Custom only / System only**, and **sort** however you like — *Name A–Z*,
+  *Custom first*, or *System first* (your choice is remembered). The list flows
+  into as many columns as the pane allows. The picker loads from the stored
+  library — no extra API call after the first load.
 - **Clear** wipes the stored library for that connection; the next picker use
   re-fetches it automatically.
 
@@ -138,10 +161,11 @@ Open **⚙️ Settings** in the top bar.
   to that folder, so big CSVs don't only live in your browser's Downloads.
 
 **Error codes, translated.** When a Marketo response carries an error code
-(606 rate limit, 1003 invalid data, 607 daily quota, …), the response viewer
-shows the code badge, the **official description** from Adobe's error-codes
-docs, and a **View in Marketo docs** link. The reference table lives in
-`catalog/error_codes.json` (48 codes, verified from the official page).
+(606 rate limit, 1003 invalid data, 607 daily quota, 601/602 token
+invalid/expired, …), the response viewer shows the code badge, the
+**official description** from Adobe's error-codes docs, and a **View in
+Marketo docs** link. The reference table lives in `catalog/error_codes.json`
+(52 codes, verified from the official page).
 
 ## How it works
 

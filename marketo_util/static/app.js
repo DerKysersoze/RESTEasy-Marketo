@@ -53,7 +53,7 @@ async function loadCatalog() {
 
 function showView(name) {
   state.view = name;
-  for (const v of ["home", "browse", "detail"]) {
+  for (const v of ["home", "browse", "fields", "detail"]) {
     document.getElementById("view-" + v).classList.toggle("hidden", v !== name);
   }
 }
@@ -107,22 +107,35 @@ function allCalls() {
   return out;
 }
 
-/* Home search space: catalog calls PLUS the bulk wizards (P9 — bulk ops were
-   previously invisible to the home search box, so e.g. “extract leads” died). */
+/* P7b — the field library is a first-class entry in home search (it opens a
+   view, not a call — so it needs no catalog/bulk entry behind it). */
+const FIELD_LIBRARY_ENTRY = {
+  id: "__field_library",
+  name: "Lead field library — view all saved fields",
+  group: "Field library",
+  view: "fields",
+};
+
+/* Home search space: the field library, catalog calls, PLUS the bulk wizards
+   (P9 — bulk ops were previously invisible to the home search box, so e.g.
+   “extract leads” died). */
 function searchPool() {
-  return allCalls().concat(state.bulk.ops || []);
+  return [FIELD_LIBRARY_ENTRY].concat(allCalls()).concat(state.bulk.ops || []);
 }
 
 function resolveCall(id) {
+  if (id === FIELD_LIBRARY_ENTRY.id) return FIELD_LIBRARY_ENTRY;
   return allCalls().find((c) => c.id === id) || state.bulk.ops.find((o) => o.id === id) || null;
 }
 
 function openEntry(entry, from) {
+  if (entry.view === "fields") { goFields(); return; }
   if (entry.method) selectCall(entry, from);
   else selectBulkOp(entry, from);
 }
 
 function badgeFor(entry) {
+  if (entry.view === "fields") return { txt: "LIB", cls: "m-get" };
   if (entry.method) return { txt: entry.method, cls: entry.method === "GET" ? "m-get" : "m-post" };
   return entry.kind === "extract" ? { txt: "BULK", cls: "m-get" } : { txt: "BULK", cls: "m-post" };
 }
@@ -143,9 +156,11 @@ function renderHome() {
     <div class="fld-stats" id="fld-stats"><span class="muted">Loading…</span></div>
     <div class="fld-actions">
       <button type="button" class="primary" id="fld-refresh">↻ Refresh field list</button>
+      <button type="button" class="ghost" id="fld-view">View all fields →</button>
       <button type="button" class="ghost small" id="fld-clear" hidden>Clear</button>
     </div>`;
   fld.querySelector("#fld-refresh").addEventListener("click", () => refreshFieldList(fld));
+  fld.querySelector("#fld-view").addEventListener("click", () => goFields());
   fld.querySelector("#fld-clear").addEventListener("click", async () => {
     if (!confirm("Clear the stored field list? Pickers will re-load it on next use — or click Refresh.")) return;
     try {
@@ -239,6 +254,185 @@ async function refreshFieldList(card) {
   } finally {
     btn.disabled = false;
     btn.textContent = "↻ Refresh field list";
+  }
+}
+
+/* ---- P7b: field library view — browse ALL saved fields (no call needed) ----
+   Served entirely by GET /api/fields (the stored library) — zero Marketo
+   calls unless the user explicitly Refreshes from Marketo. */
+
+const fldsState = { fields: null, stats: null, tag: "all", q: "", shown: [] };
+
+function goFields() {
+  state.backTo = "home";
+  showView("fields");
+  renderFieldsView();
+  document.getElementById("view-fields").scrollTo({ top: 0 });
+}
+
+async function renderFieldsView() {
+  const statsEl = $("#flds-stats");
+  const listEl = $("#flds-list");
+  statsEl.innerHTML = '<span class="muted">Loading…</span>';
+  listEl.innerHTML = '<div class="empty">Loading field library…</div>';
+  try {
+    const data = await req("GET", "/api/fields");
+    fldsState.fields = data.fields || [];
+    fldsState.stats = data.stats;
+  } catch (e) {
+    statsEl.innerHTML = "";
+    fldsErrorState(listEl, e.message);
+    return;
+  }
+  statsEl.innerHTML = fldsState.stats.count > 0 ? fieldStatsHtml(fldsState.stats) : "";
+  renderFldsRows();
+}
+
+function fldsErrorState(el, msg) {
+  const noConn = /no marketo connection/i.test(msg);
+  el.innerHTML = `
+    <div class="empty">
+      <div class="flds-empty-title">${noConn ? "No connection to load fields from" : "Couldn't load the field library"}</div>
+      <div>${esc(msg)}</div>
+      ${noConn
+        ? '<button type="button" class="primary flds-open-conn" style="margin-top:12px">Manage connections</button>'
+        : '<button type="button" class="primary flds-retry" style="margin-top:12px">↻ Try again</button>'}
+    </div>`;
+  const openConn = el.querySelector(".flds-open-conn");
+  if (openConn) openConn.addEventListener("click", () => {
+    clearProfileForm();
+    $("#modal").classList.remove("hidden");
+    loadConnStatus();
+  });
+  const retry = el.querySelector(".flds-retry");
+  if (retry) retry.addEventListener("click", renderFieldsView);
+}
+
+function renderFldsRows() {
+  const listEl = $("#flds-list");
+  const countEl = $("#flds-count");
+  if (!fldsState.fields) return;
+
+  if (!fldsState.fields.length) {
+    fldsState.shown = [];
+    countEl.textContent = "0 fields";
+    listEl.innerHTML = `
+      <div class="empty">
+        <div class="flds-empty-title">No fields saved yet for this connection</div>
+        <div>Load them from Marketo — one call, stored on this machine, and every picker in the app uses the saved copy afterwards.</div>
+        <button type="button" class="primary flds-load" style="margin-top:12px">↻ Load from Marketo</button>
+      </div>`;
+    const b = listEl.querySelector(".flds-load");
+    if (b) b.addEventListener("click", () => refreshFieldsView({ btn: b }));
+    return;
+  }
+
+  const q = fldsState.q.trim().toLowerCase();
+  const rows = [];
+  for (const f of sortFieldOptions(fldsState.fields)) {
+    const tagOf = f.isCustom === true ? "custom" : f.isCustom === false ? "system" : "untagged";
+    if (fldsState.tag !== "all" && tagOf !== fldsState.tag) continue;
+    const hay = `${f.label} ${f.name} ${f.dataType || ""} ${f.description || ""}`.toLowerCase();
+    if (q && !hay.includes(q)) continue;
+    rows.push(f);
+  }
+  fldsState.shown = rows; // what Copy CSV exports (current filter + search)
+  countEl.textContent = `${rows.length.toLocaleString()} of ${fldsState.fields.length.toLocaleString()} fields`;
+
+  if (!rows.length) {
+    listEl.innerHTML = `<div class="empty">No fields match ${q ? `<b>“${esc(q)}”</b>` : "this filter"}.<br>
+      <span style="font-size:12.5px">Try a different search, or switch the All / Custom / System filter.</span></div>`;
+    return;
+  }
+
+  listEl.innerHTML = '<div class="flds-card"></div>';
+  const card = listEl.querySelector(".flds-card");
+  for (const f of rows) {
+    const row = document.createElement("div");
+    row.className = "flds-row";
+    row.innerHTML = `
+      <span class="flds-key">Name</span>
+      <span class="flds-label">${esc(f.label)}</span>
+      <span class="flds-key">API</span>
+      <code class="flds-api">${esc(f.name)}</code>
+      ${f.dataType ? `<span class="flds-dt">${esc(f.dataType)}</span>` : ""}
+      <span class="flds-badges">${fieldBadgesHtml(f)}</span>
+      <button type="button" class="ghost small flds-copy" title="Copy the API name to paste into a call">Copy</button>
+      ${f.description ? `<div class="flds-desc">${esc(f.description)}</div>` : ""}`;
+    row.querySelector(".flds-copy").addEventListener("click", (e) => copyText(f.name, e.currentTarget));
+    card.appendChild(row);
+  }
+}
+
+async function refreshFieldsView(opts = {}) {
+  const headerBtn = $("#flds-refresh");
+  const busy = opts.btn || headerBtn;
+  if (busy.disabled) return;
+  busy.disabled = true;
+  const old = busy.textContent;
+  busy.textContent = "⏳ Loading from Marketo…";
+  try {
+    await req("POST", "/api/fields/refresh");
+    await renderFieldsView();
+  } catch (e) {
+    if (opts.btn) fldsErrorState($("#flds-list"), e.message); // nothing stored yet — show it in the list
+    else $("#flds-stats").innerHTML = `<span style="color:var(--red)">${esc(e.message)}</span>`;
+  } finally {
+    busy.disabled = false;
+    busy.textContent = old;
+  }
+}
+
+/* ---- Copy CSV: export the fields shown (current filter/search) ---- */
+function csvCell(v) {
+  const s = String(v == null ? "" : v);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function fieldsToCsv(fields) {
+  const tri = (v) => (v === true ? "yes" : v === false ? "no" : "unknown");
+  const lines = ["api_name,display_name,data_type,custom,read_only,hidden,sensitive,description"];
+  for (const f of fields) {
+    lines.push([
+      f.name, f.label, f.dataType || "",
+      tri(f.isCustom), tri(f.readOnly), tri(f.isHidden), tri(f.isSensitive),
+      f.description || "",
+    ].map(csvCell).join(","));
+  }
+  return lines.join("\r\n");
+}
+
+function copyFieldsCsv() {
+  const btn = $("#flds-copycsv");
+  if (!fldsState.shown.length) {
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = "Nothing to copy";
+    setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1400);
+    return;
+  }
+  copyText(fieldsToCsv(fldsState.shown), btn);
+}
+
+/* ---- copy field API names to the clipboard ---- */
+function copyText(text, btn) {
+  const old = btn ? btn.textContent : "";
+  const set = (t) => { if (btn) btn.textContent = t; };
+  const ok = () => { set("✓ Copied"); setTimeout(() => set(old), 1200); };
+  const fail = () => { set("Copy failed"); setTimeout(() => set(old), 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(ok, fail);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    let done = false;
+    try { done = document.execCommand("copy"); } catch { done = false; }
+    ta.remove();
+    done ? ok() : fail();
   }
 }
 
@@ -531,12 +725,27 @@ function fieldBadgesHtml(f) {
   return h;
 }
 
-function sortFieldOptions(fields) {
-  // custom first, then standard (system), then untagged; alphabetical by label
-  const rank = (f) => (f.isCustom === true ? 0 : f.isCustom === false ? 1 : 2);
-  return [...fields].sort(
-    (a, b) => rank(a) - rank(b) || String(a.label).localeCompare(String(b.label))
-  );
+const FIELD_SORT_KEY = "marketo.fieldSort";
+
+function savedFieldSort() {
+  try {
+    const v = localStorage.getItem(FIELD_SORT_KEY);
+    return ["name", "custom", "system"].includes(v) ? v : "custom";
+  } catch {
+    return "custom";
+  }
+}
+
+function sortFieldOptions(fields, mode) {
+  // "name": plain A–Z · "custom": custom fields first · "system": system fields first
+  // (untagged fields trail in both group sorts; ties fall back to A–Z by label)
+  const alpha = (a, b) => String(a.label).localeCompare(String(b.label));
+  if (mode === "name") return [...fields].sort(alpha);
+  const rank =
+    mode === "system"
+      ? (f) => (f.isCustom === false ? 0 : f.isCustom === true ? 1 : 2)
+      : (f) => (f.isCustom === true ? 0 : f.isCustom === false ? 1 : 2);
+  return [...fields].sort((a, b) => rank(a) - rank(b) || alpha(a, b));
 }
 
 function renderTaggedPicker(el, fields, opts = {}) {
@@ -552,13 +761,19 @@ function renderTaggedPicker(el, fields, opts = {}) {
         <button type="button" data-f="custom">Custom only</button>
         <button type="button" data-f="system">System only</button>
       </span>
+      <select class="lk-sort" title="Sort the field list" aria-label="Sort the field list">
+        <option value="name">Name A–Z</option>
+        <option value="custom">Custom first</option>
+        <option value="system">System first</option>
+      </select>
       <button type="button" class="ghost small lk-all">Select all shown</button>
       <button type="button" class="ghost small lk-clear">Clear</button>
       <span class="muted lk-count"></span>
     </div>
     <div class="lk-list"></div>`;
   const list = el.querySelector(".lk-list");
-  for (const f of sortFieldOptions(fields)) {
+  const rowByName = new Map();
+  for (const f of sortFieldOptions(fields, savedFieldSort())) {
     const row = document.createElement("label");
     row.className = "lk-row";
     row.dataset.label = `${f.label} ${f.name} ${f.dataType || ""}`.toLowerCase();
@@ -581,8 +796,19 @@ function renderTaggedPicker(el, fields, opts = {}) {
       row.appendChild(badges);
     }
     list.appendChild(row);
+    rowByName.set(f.name, row);
   }
   const search = el.querySelector(".lk-search");
+  const sortSel = el.querySelector(".lk-sort");
+  sortSel.value = savedFieldSort();
+  sortSel.addEventListener("change", () => {
+    try { localStorage.setItem(FIELD_SORT_KEY, sortSel.value); } catch {}
+    for (const f of sortFieldOptions(fields, sortSel.value)) {
+      const r = rowByName.get(f.name);
+      if (r) list.appendChild(r); // re-appending reorders; checkbox state travels with the row
+    }
+    update();
+  });
   const count = el.querySelector(".lk-count");
   const seg = el.querySelector(".lk-seg");
   const visible = () => Array.from(list.children).filter((r) => !r.classList.contains("lk-hidden"));
@@ -680,6 +906,8 @@ function bodySectionHtml(body) {
 
 function renderDetail(call) {
   const d = $("#call-detail");
+  const splitEl = document.getElementById("detail-split");
+  if (splitEl) splitEl.classList.remove("solo");
   const notes = (call.notes || []).length
     ? `<div class="callout notes"><b>Good to know</b><ul class="notes-list"></ul></div>`
     : "";
@@ -737,6 +965,15 @@ function renderDetail(call) {
     if (wrap) state.gridReader = initSyncGrid(wrap, spec.body);
   }
   hydrateLookups(card);
+  // Right pane: friendly empty state until the first run.
+  const resp = $("#response");
+  if (resp && !resp.children.length) {
+    resp.innerHTML = `<div class="card resp-empty">
+      <div class="re-ic">📥</div>
+      <b>Run the call</b>
+      <span>the response will land in this pane</span>
+    </div>`;
+  }
 }
 
 function inputVal(section, name) {
@@ -1193,6 +1430,42 @@ async function testConnection() {
     statusEl.textContent = r.detail || (r.ok ? "OK" : "Failed");
   } catch (e) {
     statusEl.textContent = e.message;
+  } finally {
+    loadConnStatus(); // test forces a fresh token — refresh the status block
+  }
+}
+
+/* Connection status (P10): shows the access-token state for the active
+   connection — fetched/valid-until/scope from the Marketo Identity response.
+   The full token is never sent to the UI (masked only). */
+async function loadConnStatus() {
+  const box = $("#conn-status");
+  if (!box) return;
+  const when = (ts) =>
+    new Date(ts * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  try {
+    const r = await req("GET", "/api/auth/status");
+    const t = r.token || {};
+    let tokenLine;
+    if (t.state === "valid") {
+      tokenLine =
+        `Access token: fetched at ${when(t.obtainedAt)} · valid until ${when(t.expiresAt)}` +
+        (t.scope ? ` · scope: ${esc(t.scope)}` : "") +
+        `<br><span class="cs-mask">${esc(t.tokenMasked)}</span>`;
+    } else if (t.state === "expired") {
+      tokenLine = `Access token expired at ${when(t.expiresAt)} — it will be refreshed automatically on the next call.`;
+    } else {
+      tokenLine =
+        "Access token: not fetched yet. Run any call (or Test connection) and Marketo " +
+        "issues one here — tokens are valid for 1 hour.";
+    }
+    box.innerHTML =
+      `<b>${esc(r.profile.name)}</b> <span class="muted">${esc(r.profile.instance)}</span><br>` +
+      tokenLine;
+    box.classList.remove("hidden");
+  } catch (e) {
+    box.innerHTML = `<span class="muted">${esc(e.message)}</span>`;
+    box.classList.remove("hidden");
   }
 }
 
@@ -1268,6 +1541,8 @@ function renderWizSteps(stage) {
 
 function renderWizard(op) {
   const d = $("#call-detail");
+  const splitEl = document.getElementById("detail-split");
+  if (splitEl) splitEl.classList.add("solo");
   const kindCls = op.kind === "extract" ? "method-get" : "method-post";
   d.innerHTML = `
     <div class="crumbs"><button id="btn-back" class="back">${state.backTo === "browse" ? "← Browse" : "← Home"}</button> <span class="sep">·</span> <span>${esc(op.group)}</span> &rsaquo; <span>${esc(op.name)}</span></div>
@@ -1741,10 +2016,72 @@ function initTheme() {
   } catch {}
 }
 
+/* ---- detail view: resizable two-pane split (mockup 7) ----
+   Drag the gutter between the form pane and the response pane. The form pane
+   can range from 25% to 75% of the window (i.e. the response can grow to 75%).
+   Position persists per browser; double-click the gutter to reset.          */
+const SPLIT_KEY = "marketo.detailSplit";
+const SPLIT_DEFAULT = 42;
+const SPLIT_MIN = 25;
+const SPLIT_MAX = 75;
+
+function initSplit() {
+  const split = document.getElementById("detail-split");
+  const gutter = document.getElementById("split-gutter");
+  if (!split || !gutter) return;
+  const clamp = (v) => Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, v));
+  const set = (pct) => split.style.setProperty("--split-left", clamp(pct) + "%");
+  try {
+    const saved = parseFloat(localStorage.getItem(SPLIT_KEY));
+    if (isFinite(saved)) set(saved);
+  } catch {}
+  let dragging = false;
+  gutter.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    dragging = true;
+    gutter.setPointerCapture(e.pointerId);
+    split.classList.add("dragging");
+    document.body.style.userSelect = "none";
+  });
+  gutter.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const r = split.getBoundingClientRect();
+    if (r.width < 10) return;
+    set(((e.clientX - r.left) / r.width) * 100);
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    split.classList.remove("dragging");
+    document.body.style.userSelect = "";
+    try {
+      const cur = parseFloat(split.style.getPropertyValue("--split-left"));
+      localStorage.setItem(SPLIT_KEY, String(Math.round((isFinite(cur) ? cur : SPLIT_DEFAULT) * 10) / 10));
+    } catch {}
+  };
+  gutter.addEventListener("pointerup", end);
+  gutter.addEventListener("pointercancel", end);
+  gutter.addEventListener("dblclick", () => {
+    split.style.removeProperty("--split-left");
+    try { localStorage.removeItem(SPLIT_KEY); } catch {}
+  });
+  // Keyboard: arrow keys nudge the split (Shift = bigger steps).
+  gutter.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const step = e.shiftKey ? 10 : 2;
+    const cur = parseFloat(split.style.getPropertyValue("--split-left")) || SPLIT_DEFAULT;
+    const next = clamp(cur + (e.key === "ArrowRight" ? step : -step));
+    set(next);
+    try { localStorage.setItem(SPLIT_KEY, String(next)); } catch {}
+  });
+}
+
 /* ================= boot ================= */
 
 function bindStatic() {
   initTheme();
+  initSplit();
   const homeSearch = $("#home-search");
   homeSearch.addEventListener("input", onHomeSearch);
   homeSearch.addEventListener("keydown", (e) => {
@@ -1779,12 +2116,28 @@ function bindStatic() {
     if (t) { state.browse.group = t.dataset.g; renderBrowse(); }
   });
   $("#btn-browse").addEventListener("click", () => goBrowse());
+  // P7b — field library view (static elements in index.html; bind once).
+  $("#flds-back").addEventListener("click", goHome);
+  $("#flds-copycsv").addEventListener("click", copyFieldsCsv);
+  $("#flds-refresh").addEventListener("click", () => refreshFieldsView());
+  $("#flds-search").addEventListener("input", (e) => { fldsState.q = e.target.value; renderFldsRows(); });
+  $("#flds-search").addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && e.target.value) { e.target.value = ""; fldsState.q = ""; renderFldsRows(); }
+  });
+  document.querySelector(".flds-seg").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-f]");
+    if (!b) return;
+    fldsState.tag = b.dataset.f;
+    $$(".flds-seg button").forEach((x) => x.classList.toggle("on", x === b));
+    renderFldsRows();
+  });
   // Persistent back-to-main-menu: visible on every view (home/browse/detail/bulk wizard).
   $("#btn-home").addEventListener("click", () => goHome());
   $("#btn-manage").addEventListener("click", () => {
     clearProfileForm();
     $("#modal").classList.remove("hidden");
     $("#pf-name").focus();
+    loadConnStatus();
   });
   $$("[data-close]").forEach((b) => b.addEventListener("click", () => $("#modal").classList.add("hidden")));
   $("#modal").addEventListener("click", (e) => { if (e.target === $("#modal")) $("#modal").classList.add("hidden"); });
@@ -1795,6 +2148,7 @@ function bindStatic() {
   $("#profile-select").addEventListener("change", async (e) => {
     await req("POST", `/api/config/active?profile_id=${e.target.value}`);
     await loadProfiles();
+    loadConnStatus();
   });
   bindSettings();
 }

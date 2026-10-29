@@ -155,6 +155,18 @@ def test_connection(profile_id: int | None = None) -> dict:
     return {"ok": True, "detail": f"Credentials accepted (test call returned HTTP {resp.status_code})."}
 
 
+@app.get("/api/auth/status")
+def auth_status(profile_id: int | None = None) -> dict:
+    """Cached access-token state for a connection (masked — never the full token)."""
+    p = config.get_profile(profile_id) if profile_id else config.get_active()
+    if p is None:
+        raise HTTPException(400, "No connection configured — add one first.")
+    return {
+        "profile": {"id": p.id, "name": p.name, "instance": p.instance},
+        "token": auth.token_status(p),
+    }
+
+
 # --- lookup sources for UI pickers ---------------------------------------------
 @app.get("/api/lookup/{source}")
 def lookup(source: str, profile_id: int | None = None) -> JSONResponse:

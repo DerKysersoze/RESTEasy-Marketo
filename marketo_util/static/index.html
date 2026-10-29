@@ -49,12 +49,13 @@
       </div>
     </section>
 
-    <section class="tasks" id="tasks" aria-label="Tasks"></section>
-
+    <!-- Recently run sits between the popular-tag hint and the task cards -->
     <section class="recent hidden" id="recent-section">
       <h2>Recently run (this connection)</h2>
       <div class="chips" id="recent-chips"></div>
     </section>
+
+    <section class="tasks" id="tasks" aria-label="Tasks"></section>
 
     <section class="browse">
       <div class="browse-in">
@@ -83,11 +84,44 @@
     <div class="gridwrap" id="browse-grid"></div>
   </div>
 
-  <!-- ================= DETAIL — call form / bulk wizard (unchanged) ================= -->
+  <!-- ================= FIELDS — saved lead field library (P7b) ================= -->
+  <div id="view-fields" class="view hidden">
+    <div class="pagehead">
+      <div>
+        <button id="flds-back" type="button" class="back">← Home</button>
+        <h1>Lead field library</h1>
+        <p>Every lead field saved for this connection — its API name, type, whether it's custom, and whether Marketo lets you set it.</p>
+      </div>
+      <div class="flds-head-actions">
+        <button id="flds-copycsv" type="button" class="ghost" title="Copy the fields shown (after your filter/search) as CSV — paste into Excel, Sheets, or any tool">⧉ Copy CSV</button>
+        <button id="flds-refresh" type="button" class="ghost">↻ Refresh from Marketo</button>
+      </div>
+    </div>
+    <div class="flds-sub"><div class="flds-stats" id="flds-stats"><span class="muted">Loading…</span></div></div>
+    <div class="flds-toolbar">
+      <div class="searchwrap flds-searchwrap">
+        <span class="ic">🔍</span>
+        <input id="flds-search" type="search" placeholder="Search name, label, type… (try “nps”, “email”, “date”)" autocomplete="off">
+      </div>
+      <span class="seg flds-seg" role="group" aria-label="Field type filter">
+        <button type="button" class="on" data-f="all">All</button>
+        <button type="button" data-f="custom">Custom only</button>
+        <button type="button" data-f="system">System only</button>
+      </span>
+      <span class="muted flds-count" id="flds-count"></span>
+    </div>
+    <div class="flds-list" id="flds-list"></div>
+  </div>
+
+  <!-- ================= DETAIL — call form left · response right (mockup 7) ================= -->
   <div id="view-detail" class="view hidden">
     <div class="main">
-      <div id="call-detail"></div>
-      <div id="response"></div>
+      <div class="detail-split" id="detail-split">
+        <div class="pane pane-form" id="call-detail"></div>
+        <div class="split-gutter" id="split-gutter" role="separator" aria-orientation="vertical"
+             tabindex="0" title="Drag to resize the panes — double-click to reset"></div>
+        <div class="pane pane-resp" id="response"></div>
+      </div>
     </div>
   </div>
 
@@ -103,11 +137,13 @@
 
       <hr>
 
+      <div id="conn-status" class="conn-status hidden"></div>
+
       <h3 id="pf-title">Add a connection</h3>
       <p class="muted small">
-        Find your credentials in Marketo <b>Admin Center → Integrations → API Keys &amp;
-        Access Tokens</b> (REST API key and secret). The instance name looks like
-        <code>100-AEK-913</code>.
+        Find your credentials in Marketo <b>Admin → Integration → Web Services</b>
+        (REST API section: Client ID and Client Secret for your API-only user). The
+        instance name looks like <code>100-AEK-913</code>.
       </p>
       <div class="form-grid" id="profile-form">
         <label>Name <input id="pf-name" placeholder="e.g. Production"></label>

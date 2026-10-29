@@ -10,6 +10,8 @@
     "502": {"desc": "Bad Gateway", "cat": "server", "comment": "The server hit an unexpected condition. Retry in a moment."},
     "503": {"desc": "Service Unavailable", "cat": "server", "comment": "Marketo is temporarily unavailable. Wait and retry."},
     "600": {"desc": "Marketo server error", "cat": "server", "comment": "Marketo had a server error. Retry in a moment."},
+    "601": {"desc": "Access token invalid", "cat": "auth", "comment": "The access token sent was not valid. The app refreshes it automatically; if it persists, re-test the connection."},
+    "602": {"desc": "Access token expired", "cat": "auth", "comment": "The access token expired. The app refreshes it automatically; if it persists, re-test the connection."},
     "606": {"desc": "Max rate limit exceeded", "cat": "limit", "comment": "More than 100 calls in the past 20 seconds. Wait a moment and try again."},
     "607": {"desc": "Daily quota reached", "cat": "limit", "comment": "Today's calls exceeded the subscription quota (resets daily at 12:00 AM CST)."},
     "608": {"desc": "API Temporarily Unavailable", "cat": "server", "comment": "Wait a moment and retry."},

@@ -642,7 +642,7 @@ def test_token_cached_in_memory(monkeypatch):
 
     def fake_fetch(profile):
         calls.append(profile.id)
-        return "tok-1", 1200
+        return authmod.TokenInfo(token="tok-1", expires_in=3600)
 
     monkeypatch.setattr(authmod, "fetch_token", fake_fetch)
     p = config.Profile(
@@ -1499,3 +1499,118 @@ def test_p8_settings_restored_after_suite():
     s = client.get("/api/settings").json()
     assert s["log_calls"] is False and s["save_bulk_files"] is False
     assert s["export_dir"] == s["default_dir"]
+
+
+# ================= P10 — auth alignment + access-token visibility =================
+
+
+def test_p10_error_table_has_601_602():
+    """The official token error codes (601 invalid / 602 expired) must be mapped."""
+    p = pathlib.Path(__file__).resolve().parent.parent / "catalog" / "error_codes.json"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["codes"]["601"]["desc"] == "Access token invalid"
+    assert d["codes"]["602"]["desc"] == "Access token expired"
+    assert d["codes"]["601"]["cat"] == "auth" and d["codes"]["602"]["cat"] == "auth"
+
+
+def test_p10_extract_error_parses_errors_array():
+    """Marketo's response-level shape {"success": false, "errors": [{code, message}]}."""
+    from marketo_util import executor
+
+    body = json.dumps(
+        {"requestId": "e42b", "success": False,
+         "errors": [{"code": "602", "message": "Access token expired"}]})
+    code, msg = executor._extract_error(body)
+    assert code == "602" and msg == "Access token expired"
+    # the older single-error shape still parses
+    code2, msg2 = executor._extract_error(json.dumps({"error": {"code": "1003", "message": "x"}}))
+    assert code2 == "1003" and msg2 == "x"
+    # friendly text now uses the official 602 description
+    assert "expired" in executor._friendly(401, "602", "Access token expired").lower()
+
+
+def test_p10_request_retries_on_601(monkeypatch):
+    """401 or body-level 601/602 must force one token refresh + retry."""
+    import marketo_util.auth as authmod
+    from marketo_util import config
+
+    authmod._token_cache.clear()
+    fetches: list[str] = []
+
+    def fake_fetch(profile):
+        tok = "tok-A" if not fetches else "tok-B"
+        fetches.append(tok)
+        return authmod.TokenInfo(token=tok, expires_in=3600, scope="apis@test")
+
+    def fake_httpx_request(method, url, **kw):
+        authz = kw.get("headers", {}).get("Authorization", "")
+        if authz.endswith("tok-A"):
+            return FakeResp(401, {"requestId": "r1", "success": False,
+                                  "errors": [{"code": "601", "message": "Unauthorized"}]})
+        return FakeResp(200, {"result": []})
+
+    monkeypatch.setattr(authmod, "fetch_token", fake_fetch)
+    monkeypatch.setattr(authmod.httpx, "request", fake_httpx_request)
+    try:
+        p = config.Profile(id=99998, name="t", instance="100-T.mktorest.com",
+                           client_id="i", client_secret="s", is_active=True)
+        resp = authmod.request(p, "GET", "/rest/v1/leads.json")
+        assert resp.status_code == 200
+        assert fetches == ["tok-A", "tok-B"], "a 601 must force exactly one refresh+retry"
+    finally:
+        authmod._token_cache.clear()
+
+
+def test_p10_invalid_client_message(monkeypatch):
+    """Identity 401 invalid_client → actionable secret-rotation remediation."""
+    import marketo_util.auth as authmod
+    from marketo_util import config
+
+    monkeypatch.setattr(
+        authmod.httpx, "post",
+        lambda *a, **kw: FakeResp(401, {"error": "invalid_client",
+                                        "error_description": "Bad client credentials"}))
+    p = config.Profile(id=99997, name="t", instance="100-T.mktorest.com",
+                       client_id="i", client_secret="s", is_active=True)
+    try:
+        authmod.fetch_token(p)
+        assert False, "expected AuthError"
+    except authmod.AuthError as e:
+        m = str(e)
+        assert "invalid_client" in m
+        assert "secret" in m.lower()
+        assert "Integration" in m  # points at Marketo Admin → Integration → Web Services
+
+
+def test_p10_auth_status_endpoint(monkeypatch):
+    """GET /api/auth/status: masked token + scope + expiry; full token never sent."""
+    import marketo_util.auth as authmod
+    from marketo_util import config
+
+    authmod._token_cache.clear()
+    p = config.create_profile("p10-status", "100-T.mktorest.com", "cid-p10", "sec-p10")
+    config.set_active(p.id)
+    try:
+        # state: none (fresh cache)
+        r = client.get("/api/auth/status")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["profile"]["id"] == p.id
+        assert body["token"]["state"] == "none"
+
+        # warm the cache with a known token, then verify visibility + masking
+        monkeypatch.setattr(
+            authmod, "fetch_token",
+            lambda prof: authmod.TokenInfo(
+                token="abcd1234efgh5678ijkl9012", expires_in=3600, scope="apis@joesj.com"))
+        authmod.get_token(p)
+        r = client.get("/api/auth/status")
+        t = r.json()["token"]
+        assert t["state"] == "valid"
+        assert t["scope"] == "apis@joesj.com"
+        assert t["tokenMasked"] == "abcd1234…9012"
+        assert t["expiresAt"] > t["obtainedAt"]
+        assert "abcd1234efgh5678ijkl9012" not in r.text, "full token must never reach the client"
+    finally:
+        config.delete_profile(p.id)
+        authmod._token_cache.clear()

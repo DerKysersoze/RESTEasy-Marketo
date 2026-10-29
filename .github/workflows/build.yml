@@ -5,6 +5,7 @@ on:
   push:
     tags:
       - "v*"                  # tagging v0.2.0 etc. builds + publishes a release
+      - "V*"                  # GitHub tag filters are case-sensitive; accept V-prefixed tags too
 
 jobs:
   test:

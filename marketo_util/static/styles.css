@@ -171,8 +171,8 @@ code {
 .task .more { font-size: 12.5px; font-weight: 700; color: var(--primary); text-align: right; margin-top: auto; cursor: pointer; }
 .task:hover .more { color: var(--primary-dark); }
 
-/* recently-run strip */
-.recent { max-width: 1100px; margin: 0 auto 10px; padding: 0 28px; }
+/* recently-run strip (between the hero's popular tags and the task cards) */
+.recent { max-width: 1100px; margin: 0 auto; padding: 26px 28px 0; }
 .recent h2 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -227,9 +227,24 @@ code {
 .b-perm { color: var(--muted); background: var(--panel); border: 1px solid var(--line); }
 .empty { padding: 40px; text-align: center; color: var(--muted); background: var(--panel); border: 1px dashed var(--line); border-radius: var(--radius); }
 
-/* detail view */
-.main { padding: 24px 28px 70px; }
-.main > * { max-width: 880px; margin: 0 auto; }
+/* detail view — mockup 7: form pane left · response pane right, filling the window */
+.main { padding: 24px 28px 60px; }
+.detail-split { display: grid; grid-template-columns: minmax(320px, var(--split-left, 42%)) 12px 1fr; align-items: start; gap: 0 16px; }
+.pane { min-width: 0; }
+.pane-resp { position: sticky; top: 12px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; }
+.pane-resp .card { flex: 1; display: flex; flex-direction: column; min-height: 420px; }
+.pane-resp .card .json-view { flex: 1; min-height: 0; max-height: none; }
+.split-gutter { align-self: stretch; cursor: col-resize; touch-action: none; position: relative; outline-offset: 2px; }
+.split-gutter::before { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 3px; transform: translateX(-50%); background: var(--line); border-radius: 2px; }
+.split-gutter:hover::before, .detail-split.dragging .split-gutter::before { background: var(--primary-line); }
+/* bulk wizard keeps its single column: it renders its job banner in the form pane */
+.detail-split.solo { grid-template-columns: 1fr; }
+.detail-split.solo .split-gutter, .detail-split.solo .pane-resp { display: none; }
+/* right pane before the first run */
+.resp-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; padding: 46px 20px; border-style: dashed; color: var(--muted); }
+.resp-empty .re-ic { font-size: 26px; }
+.resp-empty b { color: var(--text-2); font-size: 14.5px; }
+.resp-empty span { font-size: 13px; }
 .back { font: inherit; font-size: 12.5px; font-weight: 700; color: var(--primary); background: none; border: 0; cursor: pointer; padding: 0; }
 .back:hover { color: var(--primary-dark); text-decoration: underline; }
 .crumbs .sep { margin: 0 7px; color: var(--line-soft); }
@@ -392,6 +407,17 @@ button.small { padding: 4px 10px; font-size: 12.5px; }
 .muted { color: var(--muted); }
 .small { font-size: 12.5px; }
 .profile-table { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+.conn-status {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0 4px;
+  font-size: 13px;
+  line-height: 1.55;
+  background: var(--panel-2);
+  word-break: break-word;
+}
+.conn-status .cs-mask { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
 .prow {
   display: flex;
   align-items: center;
@@ -428,7 +454,9 @@ button.small { padding: 4px 10px; font-size: 12.5px; }
 .lk-bar { display: flex; gap: 8px; align-items: center; padding: 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .lk-search { flex: 1; min-width: 150px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--panel-2); }
 .lk-search:focus { outline: 2px solid var(--primary); outline-offset: -1px; background: var(--panel); }
-.lk-list { max-height: 230px; overflow-y: auto; padding: 6px 8px; }
+.lk-sort { padding: 4.5px 8px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 12px; font-weight: 650; color: var(--text-2); background: var(--panel); cursor: pointer; }
+.lk-sort:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+.lk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2px 20px; align-content: start; max-height: 340px; overflow-y: auto; padding: 8px 10px; }
 .lk-row { display: flex; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-size: 13px; }
 .lk-row:hover { background: var(--hover); }
 .lk-row input { margin: 0; }
@@ -455,6 +483,33 @@ button.small { padding: 4px 10px; font-size: 12.5px; }
 .fld-stats .t-custom { color: var(--green); }
 .fld-stats .t-system { color: var(--state-idle-text); }
 .fld-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: auto; }
+
+/* ---------- P7b: field library view (browse all saved fields) ---------- */
+.flds-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.flds-sub { max-width: 1280px; margin: 0 auto; padding: 0 28px 8px; }
+.flds-stats { display: inline-flex; flex-wrap: wrap; gap: 3px 6px; font-size: 12.5px; color: var(--text-2); background: var(--tint-2); border: 1px solid var(--tint-line); border-radius: 9px; padding: 9px 12px; line-height: 1.7; }
+.flds-stats b { font-weight: 750; }
+.flds-stats .t-custom { color: var(--green); }
+.flds-stats .t-system { color: var(--state-idle-text); }
+.flds-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 28px 12px; max-width: 1280px; margin: 0 auto; position: sticky; top: 0; background: var(--bg); z-index: 4; }
+.flds-searchwrap { position: relative; flex: 1; min-width: 220px; max-width: 520px; }
+.flds-searchwrap .ic { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+#flds-search { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: var(--panel); }
+#flds-search:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+.flds-count { font-size: 12.5px; white-space: nowrap; margin-left: auto; }
+.flds-list { max-width: 980px; margin: 0 auto; padding: 0 28px 60px; }
+.flds-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.flds-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 9px 14px; border-bottom: 1px solid var(--line-soft2); }
+.flds-row:last-child { border-bottom: 0; }
+.flds-row:hover { background: var(--hover); }
+.flds-key { font-size: 9.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1.5px 5px; flex: none; }
+.flds-label { font-weight: 650; font-size: 13.5px; }
+.flds-api { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--muted); background: var(--code-bg); border-radius: 5px; padding: 1.5px 7px; }
+.flds-dt { font-size: 11.5px; color: var(--muted); }
+.flds-badges { display: inline-flex; gap: 5px; align-items: center; }
+.flds-copy { margin-left: auto; flex: none; }
+.flds-desc { flex-basis: 100%; font-size: 12.5px; color: var(--muted); line-height: 1.45; margin-top: 1px; }
+.flds-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 
 /* ---------- sync-mode record grid ---------- */
 .sync-wrap { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--panel-2); margin-bottom: 16px; }
@@ -550,8 +605,16 @@ table.jobhist td.muted { font-size: 12px; }
   .tasks { padding: 18px 16px 22px; }
   .recent, .browse { padding-left: 16px; padding-right: 16px; }
   .pagehead { padding: 18px 16px 8px; }
+  .flds-sub, .flds-toolbar, .flds-list { padding-left: 16px; padding-right: 16px; }
+  .flds-count { margin-left: 0; }
   .tabs { padding: 8px 16px 0; }
   .gridwrap { padding: 12px 16px 50px; }
   .grid { grid-template-columns: 1fr; }
   .main { padding: 16px; }
+  .detail-split { display: block; }
+  .detail-split .split-gutter { display: none; }
+  .detail-split .pane-resp { position: static; max-height: none; display: block; margin-top: 18px; }
+  .detail-split .pane-resp .card { min-height: 0; display: block; }
+  .detail-split .pane-resp .card .json-view { max-height: 480px; }
+  .lk-list { max-height: 260px; }
 }

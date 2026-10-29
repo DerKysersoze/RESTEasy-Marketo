@@ -55,9 +55,17 @@ def _extract_error(body_text: str) -> tuple[str, str]:
     except (ValueError, TypeError):
         return "", (body_text or "")[:300]
     if isinstance(data, dict):
-        err = data.get("error") if isinstance(data.get("error"), dict) else data
-        code = str(err.get("code") or err.get("error_code") or "")
-        msg = str(err.get("message") or err.get("error_description") or "")
+        # Marketo's response-level error shape (e.g. 601/602 auth errors):
+        # {"success": false, "errors": [{"code": "601", "message": "..."}]}
+        errs = data.get("errors")
+        if isinstance(errs, list) and errs and isinstance(errs[0], dict):
+            e = errs[0]
+            code = str(e.get("code") or "")
+            msg = str(e.get("message") or "")
+        else:
+            err = data.get("error") if isinstance(data.get("error"), dict) else data
+            code = str(err.get("code") or err.get("error_code") or "")
+            msg = str(err.get("message") or err.get("error_description") or "")
     return code, msg
 
 
