@@ -20,3 +20,7 @@ mockups/
 # Build output (the spec file itself IS committed — CI builds from it)
 build/
 dist/
+
+# Local release zips (CI builds these for GitHub Releases)
+RESTEasy-Marketo-windows-x64.zip
+RESTEasy-Marketo-macos-arm64.zip
