@@ -192,12 +192,6 @@ Marketo docs** link. The reference table lives in `catalog/error_codes.json`
 | `MARKETO_UTIL_CATALOG` | `./catalog` | Catalog directory |
 | `MARKETO_UTIL_NO_BROWSER` | – | Set to `1` to not auto-open the browser |
 
-## Tests
-
-```bat
-pytest -q
-```
-
 ## Building the desktop app
 
 The distributable builds (single `RESTEasy-Marketo.exe` on Windows,
