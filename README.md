@@ -197,18 +197,3 @@ python3 -m venv .venv-pkg
 codesign --force --deep --sign - "dist/Marketo RESTEasy.app"   # ad-hoc sign
 # -> dist/Marketo RESTEasy.app
 ```
-
-GitHub Actions does exactly this for both platforms (`.github/workflows/build.yml`):
-run it manually from the **Actions** tab, or push a `v*` tag to publish a
-Release with both zips.
-
-Packaging notes:
-
-- The app is imported by uvicorn from the string `"marketo_util.app:app"`,
-  so the spec must keep `collect_submodules("marketo_util")` in `hiddenimports`.
-- `catalog/` and `marketo_util/static/` are bundled as data at the exact
-  relative paths the code expects (`catalog.py` / `app.py` resolve them from
-  `__file__`).
-- The packaged app has no console window; `run.py` redirects startup logs to
-  `<app-data>/marketo-utility.log` when running frozen.
-- Icons live in `packaging/` (`.ico` for Windows, `.icns` for macOS).
