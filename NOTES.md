@@ -570,6 +570,31 @@ closes the earlier gap that bulk CSVs only land in the browser Downloads folder.
   (presets/favorites, PyInstaller, permissions guide), generalize the field
   library to other object types.
 
+### 2026-10-29 — P9: home “Popular” tags + search fixed (small)
+- **Issue:** home popular tags typed their `data-q` string into the search box
+  (substring match over name/summary/whenToUse/group — catalog calls only, bulk
+  ops EXCLUDED). 2 of 4 tags hit nothing: “lead email” (real call is *Get Leads
+  by Filter Type* — nothing contains that substring) and “extract leads” (the
+  bulk wizards were outside the search space). The search placeholder suggested
+  more dead-end examples (“lead email”, “program status”).
+- **Fix (index.html + app.js only, no API changes):**
+  - Tags are now DIRECT links to real calls via `data-id` (task-style labels):
+    “Find a lead by email” → `leads.get_by_filter`; “Who's in a program?” →
+    `programs.members`; “Export a list to CSV” → `bulk.extract_leads`
+    (opens the wizard); “Test an email” → `emails.send_sample`. Handler:
+    `resolveCall(id)` → `openEntry()` (already handles catalog calls AND bulk
+    ops); if an id is ever missing, falls back to searching by the label text.
+  - Placeholder examples updated to strings that actually hit: “lead by id”,
+    “program member”, “send sample”, “bulk”.
+  - New `searchPool()` = catalog calls + bulk ops, used by `onHomeSearch` —
+    “extract leads” / “bulk” / “import” from the home search box now return the
+    wizards (the browse grid already included bulk ops via `browseSections()`).
+- **Verified:** `node --check` OK; all 4 tag targets resolve against the live
+  catalog + `/api/bulk/ops`; every placeholder query hits ≥1 (extract leads →
+  “Extract leads (bulk)”, was 0); live server serves the new HTML/JS without a
+  restart (static files serve from disk); 47/47 tests.
+- **Status: SHIPPED.**
+
 ## Build notes (gotchas we hit)
 
 - Windows Git Bash here has no /tmp — log to a working-dir file instead.

@@ -33,7 +33,7 @@ try:
 except bulk.BulkError as exc:
     raise SystemExit(f"Bulk catalog error: {exc}") from exc
 
-app = FastAPI(title="Marketo REST Utility", version=__version__)
+app = FastAPI(title="RESTEasy-Marketo", version=__version__)
 
 
 # --- connections (profiles) --------------------------------------------------

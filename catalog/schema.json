@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Marketo Utility catalog entry",
+  "title": "RESTEasy-Marketo catalog entry",
   "description": "One file per Marketo REST call. This file documents the format; catalog.py validates entries at load time.",
   "type": "object",
   "required": ["id", "name", "group", "summary", "method", "path"],

@@ -1,9 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for Marketo RESTEasy.
+"""PyInstaller spec for RESTEasy-Marketo.
 
 One spec, both OSes:
-  Windows -> dist/MarketoRESTEasy.exe  (single file, no console)
-  macOS   -> dist/Marketo RESTEasy.app (bundle, no console)
+  Windows -> dist/RESTEasy-Marketo.exe  (single file, no console)
+  macOS   -> dist/RESTEasy-Marketo.app (bundle, no console)
 
 Data layout matches the code's path resolution exactly, so the app needs no
 frozen-specific tweaks:
@@ -13,7 +13,7 @@ Everything mutable (DB, settings, exports, logs) lives in the OS app-data dir,
 never inside the bundle.
 
 Build:  pip install -r requirements.txt pyinstaller
-        pyinstaller MarketoRESTEasy.spec --noconfirm
+        pyinstaller RESTEasy-Marketo.spec --noconfirm
 """
 import sys
 
@@ -71,7 +71,7 @@ if sys.platform == "win32":
         a.binaries,
         a.datas,
         [],
-        name="MarketoRESTEasy",
+        name="RESTEasy-Marketo",
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,
@@ -85,7 +85,7 @@ else:
         a.scripts,
         [],
         exclude_binaries=True,
-        name="MarketoRESTEasy",
+        name="RESTEasy-Marketo",
         debug=False,
         bootloader_ignore_signals=False,
         strip=False,
@@ -99,13 +99,13 @@ else:
         a.datas,
         strip=False,
         upx=False,
-        name="MarketoRESTEasy",
+        name="RESTEasy-Marketo",
     )
     # NOTE: the name must include the .app extension — PyInstaller does not
     # append it (building/osx.py uses the name verbatim as the dist folder).
     app = BUNDLE(
         coll,
-        name="Marketo RESTEasy.app",
+        name="RESTEasy-Marketo.app",
         icon="packaging/icon.icns",
         bundle_identifier="com.marketo.resteasy",
         version="0.1.0",

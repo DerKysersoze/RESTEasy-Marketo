@@ -35,14 +35,14 @@ jobs:
           pip install -r requirements.txt pyinstaller
       - name: Build
         shell: pwsh
-        run: pyinstaller MarketoRESTEasy.spec --noconfirm
+        run: pyinstaller RESTEasy-Marketo.spec --noconfirm
       - name: Package
         shell: pwsh
-        run: Compress-Archive -Path dist/MarketoRESTEasy.exe -DestinationPath MarketoRESTEasy-windows-x64.zip
+        run: Compress-Archive -Path dist/RESTEasy-Marketo.exe -DestinationPath RESTEasy-Marketo-windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: MarketoRESTEasy-windows-x64
-          path: MarketoRESTEasy-windows-x64.zip
+          name: RESTEasy-Marketo-windows-x64
+          path: RESTEasy-Marketo-windows-x64.zip
 
   build-macos:
     name: macOS (Apple Silicon)
@@ -57,23 +57,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller
       - name: Build
-        run: pyinstaller MarketoRESTEasy.spec --noconfirm
+        run: pyinstaller RESTEasy-Marketo.spec --noconfirm
       - name: Show dist/ contents
         run: ls -la dist/
       - name: Ad-hoc code sign (no Developer ID required)
         run: |
-          if [ ! -d "dist/Marketo RESTEasy.app" ]; then
-            echo "Expected 'dist/Marketo RESTEasy.app' — actual contents of dist/:" >&2
+          if [ ! -d "dist/RESTEasy-Marketo.app" ]; then
+            echo "Expected 'dist/RESTEasy-Marketo.app' — actual contents of dist/:" >&2
             ls -laR dist/ >&2
             exit 1
           fi
-          codesign --force --deep --sign - "dist/Marketo RESTEasy.app"
+          codesign --force --deep --sign - "dist/RESTEasy-Marketo.app"
       - name: Package
-        run: ditto -c -k --sequesterRsrc --keepParent "dist/Marketo RESTEasy.app" MarketoRESTEasy-macos-arm64.zip
+        run: ditto -c -k --sequesterRsrc --keepParent "dist/RESTEasy-Marketo.app" RESTEasy-Marketo-macos-arm64.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: MarketoRESTEasy-macos-arm64
-          path: MarketoRESTEasy-macos-arm64.zip
+          name: RESTEasy-Marketo-macos-arm64
+          path: RESTEasy-Marketo-macos-arm64.zip
 
   release:
     name: Publish release
@@ -89,5 +89,5 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            MarketoRESTEasy-windows-x64.zip
-            MarketoRESTEasy-macos-arm64.zip
+            RESTEasy-Marketo-windows-x64.zip
+            RESTEasy-Marketo-macos-arm64.zip

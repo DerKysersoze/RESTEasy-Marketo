@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Marketo REST Utility</title>
+  <title>RESTEasy-Marketo</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%230f62fe'/></svg>">
   <script>
     // Set the theme before first paint to avoid a flash of the wrong theme.
@@ -20,7 +20,7 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="dot"></span> Marketo REST Utility</div>
+    <div class="brand"><span class="dot"></span> RESTEasy-Marketo</div>
     <div class="top-actions">
       <button id="btn-home" class="ghost" title="Back to the main menu">🏠 Home</button>
       <select id="profile-select" title="Active Marketo connection"></select>
@@ -37,15 +37,15 @@
       <p>Pick a goal and we'll take you to the right call — or search for the thing you're after.</p>
       <div class="searchwrap">
         <span class="ic">🔍</span>
-        <input id="home-search" type="search" placeholder="Try “lead email”, “program status”, “send sample”…" autocomplete="off">
+        <input id="home-search" type="search" placeholder="Try “lead by id”, “program member”, “send sample”, “bulk”…" autocomplete="off">
         <div id="home-results" class="home-results hidden" role="listbox"></div>
       </div>
       <div class="hintline">
-        Popular:
-        <b data-q="lead email">Get leads by email</b><span class="sep">·</span>
-        <b data-q="program member">Who's in a program?</b><span class="sep">·</span>
-        <b data-q="extract leads">Export a list to CSV</b><span class="sep">·</span>
-        <b data-q="sample email">Test an email</b>
+        Popular: <!-- each tag links straight to a real call (data-id); see NOTES.md P9 -->
+        <b data-id="leads.get_by_filter">Find a lead by email</b><span class="sep">·</span>
+        <b data-id="programs.members">Who's in a program?</b><span class="sep">·</span>
+        <b data-id="bulk.extract_leads">Export a list to CSV</b><span class="sep">·</span>
+        <b data-id="emails.send_sample">Test an email</b>
       </div>
     </section>
 

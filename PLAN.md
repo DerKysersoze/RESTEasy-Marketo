@@ -1,4 +1,4 @@
-# Marketo REST Utility — Project Plan
+# RESTEasy-Marketo — Project Plan
 
 > **Compaction protocol:** At the start of every session, read `NOTES.md` first (facts, gotchas,
 > progress log), then this file (roadmap, architecture, schema). Update both as work happens.

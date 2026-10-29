@@ -1,4 +1,4 @@
-/* Marketo REST Utility — UI logic (vanilla JS, no build step).
+/* RESTEasy-Marketo — UI logic (vanilla JS, no build step).
    Everything is rendered from the catalog served at /api/catalog. */
 "use strict";
 
@@ -105,6 +105,12 @@ function allCalls() {
   const out = [];
   for (const g of state.catalog.groups) for (const c of g.calls) out.push(c);
   return out;
+}
+
+/* Home search space: catalog calls PLUS the bulk wizards (P9 — bulk ops were
+   previously invisible to the home search box, so e.g. “extract leads” died). */
+function searchPool() {
+  return allCalls().concat(state.bulk.ops || []);
 }
 
 function resolveCall(id) {
@@ -249,9 +255,10 @@ function onHomeSearch() {
   const q = (document.getElementById("home-search").value || "").trim().toLowerCase();
   const box = document.getElementById("home-results");
   if (!q) { box.classList.add("hidden"); box.innerHTML = ""; return; }
-  const match = (c) => (c.name + " " + (c.summary || "") + " " + (c.whenToUse || "") + " " + c.group).toLowerCase().includes(q);
-  const total = allCalls().filter(match).length;
-  const matches = allCalls().filter(match).slice(0, 8);
+  const match = (c) => (c.name + " " + (c.summary || "") + " " + (c.whenToUse || "") + " " + (c.group || "")).toLowerCase().includes(q);
+  const pool = searchPool();
+  const total = pool.filter(match).length;
+  const matches = pool.filter(match).slice(0, 8);
   if (!matches.length) { box.classList.add("hidden"); box.innerHTML = ""; return; }
   box.innerHTML = matches.map((c) => {
     const b = badgeFor(c);
@@ -1747,9 +1754,14 @@ function bindStatic() {
       goBrowse();
     }
   });
-  $$(".hintline b[data-q]").forEach((b) =>
+  // Popular tags (P9): each links straight to a real call via data-id —
+  // resolveCall() covers both catalog calls and bulk wizards. If the id is
+  // ever missing from the catalog, fall back to searching by the label text.
+  $$(".hintline b[data-id]").forEach((b) =>
     b.addEventListener("click", () => {
-      homeSearch.value = b.dataset.q;
+      const e = resolveCall(b.dataset.id);
+      if (e) { openEntry(e, "home"); return; }
+      homeSearch.value = b.textContent.trim();
       onHomeSearch();
       homeSearch.focus();
     })

@@ -1,4 +1,4 @@
-"""Start the Marketo REST Utility: local server + browser.
+"""Start RESTEasy-Marketo: local server + browser.
 
 Usage:  python run.py
 Env:    MARKETO_UTIL_HOST (default 127.0.0.1)

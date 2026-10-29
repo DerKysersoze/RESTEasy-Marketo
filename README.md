@@ -26,8 +26,8 @@ Get the latest build from the [Releases page](../../releases/latest):
 
 | OS | File | How to run |
 |---|---|---|
-| Windows 10/11 (x64) | `MarketoRESTEasy-windows-x64.zip` | Unzip, double-click `MarketoRESTEasy.exe` |
-| macOS 11+ (Apple Silicon) | `MarketoRESTEasy-macos-arm64.zip` | Unzip, put `Marketo RESTEasy.app` in Applications, open it |
+| Windows 10/11 (x64) | `RESTEasy-Marketo-windows-x64.zip` | Unzip, double-click `RESTEasy-Marketo.exe` |
+| macOS 11+ (Apple Silicon) | `RESTEasy-Marketo-macos-arm64.zip` | Unzip, put `RESTEasy-Marketo.app` in Applications, open it |
 
 On first launch the app starts locally and opens `http://127.0.0.1:8787`
 in your browser automatically. No installation, no Python, no configuration
@@ -176,8 +176,8 @@ pytest -q
 
 ## Building the desktop app
 
-The distributable builds (single `MarketoRESTEasy.exe` on Windows,
-`Marketo RESTEasy.app` on macOS) come from [MarketoRESTEasy.spec](MarketoRESTEasy.spec)
+The distributable builds (single `RESTEasy-Marketo.exe` on Windows,
+`RESTEasy-Marketo.app` on macOS) come from [RESTEasy-Marketo.spec](RESTEasy-Marketo.spec)
 via PyInstaller. One spec file builds both OSes — build on the OS you target
 (PyInstaller doesn't cross-compile):
 
@@ -185,15 +185,15 @@ via PyInstaller. One spec file builds both OSes — build on the OS you target
 :: Windows (in a clean venv with the app deps)
 python -m venv .venv-pkg
 .venv-pkg\Scripts\pip install -r requirements.txt pyinstaller
-.venv-pkg\Scripts\pyinstaller MarketoRESTEasy.spec --noconfirm
-:: -> dist\MarketoRESTEasy.exe
+.venv-pkg\Scripts\pyinstaller RESTEasy-Marketo.spec --noconfirm
+:: -> dist\RESTEasy-Marketo.exe
 ```
 
 ```sh
 # macOS
 python3 -m venv .venv-pkg
 .venv-pkg/bin/pip install -r requirements.txt pyinstaller
-.venv-pkg/bin/pyinstaller MarketoRESTEasy.spec --noconfirm
-codesign --force --deep --sign - "dist/Marketo RESTEasy.app"   # ad-hoc sign
-# -> dist/Marketo RESTEasy.app
+.venv-pkg/bin/pyinstaller RESTEasy-Marketo.spec --noconfirm
+codesign --force --deep --sign - "dist/RESTEasy-Marketo.app"   # ad-hoc sign
+# -> dist/RESTEasy-Marketo.app
 ```
