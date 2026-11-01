@@ -180,11 +180,6 @@ Marketo docs** link. The reference table lives in `catalog/error_codes.json`
   never in plaintext on disk when one is available.
 - The UI is served from `marketo_util/static/` (vanilla JS, no build step).
 
-## Project docs
-
-- [`PLAN.md`](PLAN.md) — roadmap, architecture, phases, decisions
-- [`NOTES.md`](NOTES.md) — verified API facts, gotchas, session log
-
 ## Environment variables
 
 | Variable | Default | Purpose |
