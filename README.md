@@ -6,6 +6,9 @@ A local, non-technical-friendly client for the **Marketo Engage REST API**.
 Browse a catalog of API calls, fill in a friendly form, and get the data back
 as pretty JSON or CSV — no JSON crafting, no token juggling.
 
+> **Disclaimer:** This is a community project. It has **no official ties to
+> Adobe** and is **not endorsed or supported** by Adobe.
+
 > **Reporting is not available via the Marketo REST API.** This tool covers
 > leads, activities, assets, programs, opportunities, and bulk data. For
 > reports, use the Marketo UI export.
