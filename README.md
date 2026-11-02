@@ -35,15 +35,28 @@ On first launch the app starts locally and opens `http://127.0.0.1:8787`
 in your browser automatically. No installation, no Python, no configuration
 file — everything is self-contained.
 
+**While it's running** the app shows a small icon in the taskbar's
+notification area (system tray, right side of the taskbar) so you can tell
+it's alive:
+
+- **Open RESTEasy** — (re)open the app in the browser
+- **Copy URL** — copies the app URL to the clipboard
+- **Quit RESTEasy** — stops the server and exits cleanly
+
+On Windows 11 the icon may start in the *hidden icons* flyout — click the
+little `^` chevron on the taskbar to find it, then right-click → **Pin** to
+keep it always visible. (Set `MARKETO_UTIL_NO_TRAY=1` to disable the icon.)
+
 **First-run notes**
 
-- **Windows:** SmartScreen may show *“Windows protected your PC”* because the
-  app isn't code-signed. Click **More info → Run**. This is normal for a
-  locally built app; nothing is downloaded or phoned home except your own
-  Marketo instance.
-- **macOS:** Gatekeeper may say the developer can't be verified (the app is
-  ad-hoc signed, not notarized). **Control-click (right-click) the app →
-  Open → Open** once, and it will open normally afterwards.
+- **Windows:** SmartScreen may show *“Windows protected your PC”* if the
+  build you downloaded predates code signing. Click **More info → Run**.
+  Signed builds name the publisher in that dialog instead. Nothing is
+  downloaded or phoned home except your own Marketo instance.
+- **macOS:** Gatekeeper may say the developer can't be verified on
+  unsigned/ad-hoc builds. **Control-click (right-click) the app → Open →
+  Open** once, and it will open normally afterwards. Signed + notarized
+  builds open directly.
 
 After that, follow the steps below (starting at *Manage connections*).
 
@@ -188,6 +201,8 @@ Marketo docs** link. The reference table lives in `catalog/error_codes.json`
 | `MARKETO_UTIL_DB` | OS app-data dir (see table above) | SQLite location |
 | `MARKETO_UTIL_CATALOG` | `./catalog` | Catalog directory |
 | `MARKETO_UTIL_NO_BROWSER` | – | Set to `1` to not auto-open the browser |
+| `MARKETO_UTIL_NO_TRAY` | – | Set to `1` to disable the system-tray icon |
+| `MARKETO_UTIL_TRAY_ICON` | bundled icon | Path to a custom tray icon image |
 
 ## Building the desktop app
 
@@ -212,3 +227,29 @@ python3 -m venv .venv-pkg
 codesign --force --deep --sign - "dist/RESTEasy-Marketo.app"   # ad-hoc sign
 # -> dist/RESTEasy-Marketo.app
 ```
+
+## Code signing
+
+Code signing is **optional**. Without it the app still works normally — Windows
+SmartScreen and macOS Gatekeeper just show a one-time warning (see *First-run
+notes* above). Signing removes that warning and shows a named publisher.
+
+The release workflow (`.github/workflows/build.yml`) signs **automatically if
+certificates are present**, and skips signing cleanly if they are not. To opt in,
+add these to **Settings → Secrets and variables → Actions** in the GitHub repo:
+
+| Secret | What it is |
+|---|---|
+| `WINDOWS_SIGNING_CERT_BASE64` | Your Windows code-signing `.pfx`, base64-encoded |
+| `WINDOWS_SIGNING_CERT_PASSWORD` | The password for that `.pfx` |
+| `MACOS_CODESIGN_P12_BASE64` | Your Apple **Developer ID** `.p12`, base64-encoded |
+| `MACOS_CODESIGN_P12_PASSWORD` | The password for that `.p12` |
+| `APPLE_ID` / `APPLE_APP_PASSWORD` / `APPLE_TEAM_ID` | Apple ID + app-specific password + team ID, for notarization |
+
+Base64-encoding a file is a one-liner (PowerShell):
+`[Convert]::ToBase64String([IO.File]::ReadAllBytes('cert.pfx'))`.
+
+> **Note:** code-signing certificates and Apple notarization require a paid
+> Microsoft / Apple developer enrollment. Everything above is optional and
+> only needed if you want to remove the first-run security warning.
+

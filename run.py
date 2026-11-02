@@ -1,10 +1,11 @@
-"""Start RESTEasy-Marketo: local server + browser.
+"""Start RESTEasy-Marketo: local server + browser + tray icon.
 
 Usage:  python run.py
 Env:    MARKETO_UTIL_HOST (default 127.0.0.1)
         MARKETO_UTIL_PORT (default 8787)
         MARKETO_UTIL_DB   (default: per-OS app-data dir — see marketo_util/db.py)
         MARKETO_UTIL_NO_BROWSER=1 to skip opening the browser
+        MARKETO_UTIL_NO_TRAY=1 to skip the system-tray icon (headless/CI)
 """
 import os
 import sys
@@ -12,6 +13,8 @@ import threading
 import webbrowser
 
 import uvicorn
+
+from marketo_util import tray as tray_mod
 
 
 def _attach_log_file() -> None:
@@ -34,9 +37,9 @@ def main() -> None:
     _attach_log_file()
     host = os.environ.get("MARKETO_UTIL_HOST", "127.0.0.1")
     port = int(os.environ.get("MARKETO_UTIL_PORT", "8787"))
-    if os.environ.get("MARKETO_UTIL_NO_BROWSER") != "1":
-        url = f"http://{host if host != '0.0.0.0' else '127.0.0.1'}:{port}/"
+    url = f"http://{host if host != '0.0.0.0' else '127.0.0.1'}:{port}/"
 
+    if os.environ.get("MARKETO_UTIL_NO_BROWSER") != "1":
         def open_browser() -> None:
             import time
 
@@ -44,7 +47,22 @@ def main() -> None:
             webbrowser.open_new_tab(url)
 
         threading.Thread(target=open_browser, daemon=True).start()
-    uvicorn.run("marketo_util.app:app", host=host, port=port, log_level="info")
+
+    config = uvicorn.Config("marketo_util.app:app", host=host, port=port, log_level="info")
+    server = uvicorn.Server(config)
+
+    icon = tray_mod.make_icon(url, lambda: setattr(server, "should_exit", True))
+    if sys.platform == "darwin" and icon is not None:
+        # macOS: pystray must own the main thread; uvicorn's selector-based
+        # asyncio loop runs fine on a background thread.
+        threading.Thread(target=server.run, name="uvicorn", daemon=True).start()
+        icon.run()  # blocks on the main thread until the tray menu says Quit
+        return
+    if icon is not None:
+        # Windows/Linux: icon on a background thread, server on the main thread
+        # (Windows' Proactor asyncio loop must stay on the main thread).
+        threading.Thread(target=icon.run, name="tray", daemon=True).start()
+    server.run()
 
 
 if __name__ == "__main__":

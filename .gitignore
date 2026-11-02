@@ -26,9 +26,19 @@ DARK-MODE-PLAN.md
 build/
 dist/
 
+# Locally extracted release downloads (kept out of the repo)
+Release/
+
 # Local release zips (CI builds these for GitHub Releases)
 RESTEasy-Marketo-windows-x64.zip
 RESTEasy-Marketo-macos-arm64.zip
+
+# Local-only code-signing tooling & guide (kept out of the repo on purpose;
+# the CI workflow carries its own inline signing steps)
+docs/SIGNING.md
+scripts/sign-windows.ps1
+scripts/sign-macos.sh
+scripts/notarize-macos.sh
 
 # Local-only test suite (kept out of the public repo)
 tests/

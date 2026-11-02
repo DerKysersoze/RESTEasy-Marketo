@@ -95,7 +95,7 @@ const TASKS = [
     calls: ["customobjects.query", "customobjects.sync", "customobjects.list"], groups: ["Custom Objects"] },
   { icon: "\u{1F4E6}", title: "Bulk import & export",
     desc: "Move big volumes in and out — thousands of rows via background jobs.",
-    calls: ["bulk.import_leads", "bulk.import_program_members", "bulk.extract_activities"], groups: ["Bulk Import", "Bulk Extract"] },
+    calls: ["bulk.import_leads", "bulk.import_program_members", "bulk.import_custom_objects", "bulk.extract_leads", "bulk.extract_activities"], groups: ["Bulk Import", "Bulk Extract"] },
   { icon: "\u{1F9FE}", title: "Forms & opportunities",
     desc: "Form definitions and fields; deals linked to leads.",
     calls: ["forms.list", "forms.available_fields", "opportunities.get"], groups: ["Forms", "Opportunities"] },
@@ -181,7 +181,7 @@ function renderHome() {
       <div class="task-ic">${t.icon}</div>
       <div><h3>${esc(t.title)}</h3></div>
       <p>${esc(t.desc)}</p>
-      <div class="links">${calls.slice(0, 4).map((c) => {
+      <div class="links">${calls.map((c) => {
         const b = badgeFor(c);
         return `<span class="link" data-id="${esc(c.id)}">
           <span class="m ${b.cls}">${esc(b.txt)}</span>${esc(c.name)}<span class="arr">→</span></span>`;
@@ -2153,8 +2153,17 @@ function bindStatic() {
   bindSettings();
 }
 
+function showVersion() {
+  // App version (single source: marketo_util/__init__.py → /api/health).
+  fetch("/api/health").then((r) => r.json()).then((d) => {
+    const el = document.getElementById("ver");
+    if (el && d && d.version) el.textContent = "v" + d.version;
+  }).catch(() => {}); // cosmetic only — never block startup
+}
+
 async function init() {
   bindStatic();
+  showVersion();
   await loadProfiles();
   await loadCatalog();
   await loadBulkOps();

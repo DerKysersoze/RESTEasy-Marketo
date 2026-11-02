@@ -24,6 +24,39 @@ jobs:
       - name: Build
         shell: pwsh
         run: pyinstaller RESTEasy-Marketo.spec --noconfirm
+      - name: Sign (Authenticode)
+        # Signs + verifies dist\RESTEasy-Marketo.exe (SHA-256 + RFC 3161 timestamp).
+        # Secrets: WINDOWS_SIGNING_CERT_BASE64    base64 of the code-signing .pfx
+        #          WINDOWS_SIGNING_CERT_PASSWORD  the .pfx password
+        if: ${{ secrets.WINDOWS_SIGNING_CERT_BASE64 != '' }}
+        shell: pwsh
+        env:
+          CERT_B64: ${{ secrets.WINDOWS_SIGNING_CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERT_PASSWORD }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $exe = "dist\RESTEasy-Marketo.exe"
+          if (-not (Test-Path $exe)) { throw "dist\RESTEasy-Marketo.exe not found" }
+          $ts = if ($env:SIGN_TIMESTAMP_URL) { $env:SIGN_TIMESTAMP_URL } else { "http://timestamp.digicert.com" }
+          $pfx = Join-Path $env:RUNNER_TEMP "resteasy-signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:CERT_B64))
+          try {
+            if ($env:CERT_PASSWORD) {
+              $pw = ConvertTo-SecureString $env:CERT_PASSWORD -AsPlainText -Force
+              Sign-Authenticode -CertFilePath $pfx -CertPassword $pw -TimestampServer $ts -Force $exe
+            } else {
+              Sign-Authenticode -CertFilePath $pfx -TimestampServer $ts -Force $exe
+            }
+            $sig = Get-AuthenticodeSignature $exe
+            if ($sig.Status -ne "Valid") { throw "Signature not valid: $($sig.Status) - $($sig.StatusMessage)" }
+            Write-Host ("Signed by: {0}" -f $sig.SignerCertificate.Subject)
+          } finally {
+            Remove-Item $pfx -Force
+          }
+      - name: Warn if unsigned
+        if: ${{ secrets.WINDOWS_SIGNING_CERT_BASE64 == '' }}
+        shell: pwsh
+        run: Write-Warning "No Windows signing certificate configured — the exe ships UNSIGNED and Windows SmartScreen will warn users. Add WINDOWS_SIGNING_CERT_BASE64 + WINDOWS_SIGNING_CERT_PASSWORD to repo secrets (see README, 'Code signing')."
       - name: Package
         shell: pwsh
         run: Compress-Archive -Path dist/RESTEasy-Marketo.exe -DestinationPath RESTEasy-Marketo-windows-x64.zip
@@ -48,16 +81,69 @@ jobs:
         run: pyinstaller RESTEasy-Marketo.spec --noconfirm
       - name: Show dist/ contents
         run: ls -la dist/
-      - name: Ad-hoc code sign (no Developer ID required)
+      - name: Import Developer ID certificate
+        # Needs these repo secrets (see README, 'Code signing'):
+        #   MACOS_CODESIGN_P12_BASE64     base64 of the Developer ID .p12
+        #   MACOS_CODESIGN_P12_PASSWORD   the .p12 password
+        id: import-certs
+        if: ${{ secrets.MACOS_CODESIGN_P12_BASE64 != '' }}
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+          p12-password: ${{ secrets.MACOS_CODESIGN_P12_PASSWORD }}
+      - name: Resolve signing identity
+        if: steps.import-certs.outputs.identities != ''
+        env:
+          IDENTITIES: ${{ steps.import-certs.outputs.identities }}
+        run: |
+          IDENTITY=$(python3 -c 'import json,os; print(json.loads(os.environ["IDENTITIES"])[0]["name"])')
+          echo "MACOS_CODESIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+          echo "Using signing identity: $IDENTITY"
+      - name: Sign (Developer ID)
+        if: ${{ env.MACOS_CODESIGN_IDENTITY != '' }}
+        run: |
+          APP="dist/RESTEasy-Marketo.app"
+          # --force: re-sign the ad-hoc build signature; --deep: nested frameworks;
+          # --options runtime: hardened runtime (required for notarization);
+          # --timestamp: signature stays valid after the certificate expires
+          codesign --force --deep --options runtime --timestamp --sign "$MACOS_CODESIGN_IDENTITY" "$APP"
+          codesign --verify --deep --strict "$APP"
+          codesign -dv "$APP" 2>&1 | sed -n '1,8p'
+      - name: Ad-hoc code sign (fallback — no Developer ID configured)
+        if: ${{ env.MACOS_CODESIGN_IDENTITY == '' }}
         run: |
           if [ ! -d "dist/RESTEasy-Marketo.app" ]; then
             echo "Expected 'dist/RESTEasy-Marketo.app' — actual contents of dist/:" >&2
             ls -laR dist/ >&2
             exit 1
           fi
+          echo "WARNING: ad-hoc signing only — Gatekeeper will warn users." >&2
+          echo "         Add MACOS_CODESIGN_P12_BASE64 + MACOS_CODESIGN_P12_PASSWORD" >&2
+          echo "         to repo secrets to sign with a Developer ID (README, 'Code signing')." >&2
           codesign --force --deep --sign - "dist/RESTEasy-Marketo.app"
-      - name: Package
+          codesign --verify --deep --strict "dist/RESTEasy-Marketo.app"
+      - name: Package (zip)
         run: ditto -c -k --sequesterRsrc --keepParent "dist/RESTEasy-Marketo.app" RESTEasy-Marketo-macos-arm64.zip
+      - name: Notarize (Apple notary service)
+        # Optional but strongly recommended: without notarization, Gatekeeper
+        # still warns on macOS 10.15+ even with a Developer ID signature.
+        # Needs repo secrets: APPLE_ID, APPLE_APP_PASSWORD, APPLE_TEAM_ID
+        if: ${{ env.MACOS_CODESIGN_IDENTITY != '' && secrets.APPLE_ID != '' }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          ZIP="RESTEasy-Marketo-macos-arm64.zip"
+          APP="dist/RESTEasy-Marketo.app"
+          xcrun notarytool submit "$ZIP" --apple-id "$APPLE_ID" --password "$APPLE_APP_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+          # Staple the ticket into the app, then re-zip so it ships inside the archive
+          xcrun stapler staple "$APP"
+          rm -f "$ZIP"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
+      - name: Verify final zip contents are signed
+        run: |
+          codesign --verify --deep --strict "dist/RESTEasy-Marketo.app"
       - uses: actions/upload-artifact@v4
         with:
           name: RESTEasy-Marketo-macos-arm64
@@ -65,7 +151,7 @@ jobs:
 
   release:
     name: Publish release
-    needs: [test, build-windows, build-macos]
+    needs: [build-windows, build-macos]
     if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/tags/V'))
     runs-on: ubuntu-latest
     permissions:
@@ -74,6 +160,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
+      - name: Show artifacts (verify both zips are present)
+        run: ls -la
       - uses: softprops/action-gh-release@v2
         with:
           files: |
