@@ -1,7 +1,6 @@
 # RESTEasy-Marketo
 
-RESTEasy is a framework for bridging complex API calls into easy flow worksteps for non-technical users, the irony of releasing this on github is not lost on me.
-
+RESTEasy is a framework for bridging complex API calls into easy flow worksteps for non-technical users.
 A local, non-technical-friendly client for the **Marketo Engage REST API**.
 Browse a catalog of API calls, fill in a friendly form, and get the data back
 as pretty JSON or CSV — no JSON crafting, no token juggling.
