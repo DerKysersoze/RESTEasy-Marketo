@@ -164,7 +164,21 @@ So you never have to type lead-field names from memory:
 
 ## Saved field sets
 
-Stop re-ticking the same fields on every call:
+**The 0.1.3 headline feature** — save the fields you use together (e.g.
+`new_lookupfieldid`, `email`, `firstName`, `lastName`) under a name like
+“Core identity”, and apply them in one click from any field picker. Sets
+are kept **per connection**.
+
+The manage page — rename, delete, reorder, export/import your sets:
+
+![The Saved field sets manage page: each set as a card with its field chips, plus rename, delete, up/down reorder, and Export JSON / Import controls](docs/screenshots/fieldsets-dark.png)
+
+Applying a set in the *Get Leads by Filter Type* field picker — the
+fields tick themselves:
+
+![Get Leads by Filter Type call page with a saved field set applied in the Fields to return picker](docs/screenshots/fieldsets-call-page-dark.png)
+
+How it works:
 
 - In any call's field picker (e.g. *Get Leads by Filter Type → Fields to
   return*), tick the fields you want and click **💾 Save as field set…** — give
