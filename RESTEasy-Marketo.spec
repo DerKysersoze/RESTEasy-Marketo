@@ -155,7 +155,7 @@ if sys.platform == "win32":
         upx=False,
         console=False,  # no console window; run.py redirects output to a log file
         icon="packaging/icon.ico",
-        # File properties → Details tab will show 0.1.2 (see _win_version_resource).
+        # File properties → Details tab shows the current version (see _win_version_resource).
         version=_win_version_resource(),
         # Windows: PyInstaller (6.x) has no built-in Authenticode support — the
         # exe is signed in a post-build step (CI does this in .github/workflows/build.yml;

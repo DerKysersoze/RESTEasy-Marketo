@@ -133,13 +133,17 @@ So you never have to type lead-field names from memory:
   field) or **system** (Marketo standard), with a **read-only** chip where it
   applies.
 - **View all fields** (same card, or search "field" on the home page) opens the
-  full saved library in its own view — no API call to open. Search by name,
-  label, or type; filter **All / Custom only / System only**; see each field's
-  API name, data type, description, and a **Copy** button so you can paste the
-  name into any call. **⧉ Copy CSV** copies the fields currently shown (after
-  your filter/search) as CSV — header + one row per field, with the custom /
-  read-only tags — ready for Excel, Sheets, or any tool. Refresh from Marketo
-  re-syncs the list in place.
+  full saved library in its own view — no API call to open. Each field reads as
+  **label → value** rows: **Display name**, **API name**, and **Type** (in
+  Marketo's own names — *String, Float, Reference, Lead Function*, …). Search
+  by name, API name, type, or description; filter **All / Custom only /
+  System only**; every row is tagged **Custom** or **System** (plus
+  **Read-only** where Marketo won't let you set it) with a **Copy** button so
+  you can paste the API name into any call. **⧉ Copy CSV** copies the fields
+  currently shown (after your filter/search) as CSV — header + one row per
+  field, with a friendly `type` column alongside the raw `data_type` — ready
+  for Excel, Sheets, or any tool. Refresh from Marketo re-syncs the list in
+  place.
 - **The call page is a two-pane workspace:** the form fills the left pane and
   the response lands in the right pane (sticky, full height) — no scrolling down
   for results. **Drag the divider** between the panes to resize them (the
@@ -157,6 +161,41 @@ So you never have to type lead-field names from memory:
 > The “custom vs system” tag comes from the Browse endpoint's `isCustom` flag.
 > When only `describe.json` is available (fallback), a field's tag shows as
 > unknown rather than guessing.
+
+## Saved field sets
+
+Stop re-ticking the same fields on every call:
+
+- In any call's field picker (e.g. *Get Leads by Filter Type → Fields to
+  return*), tick the fields you want and click **💾 Save as field set…** — give
+  it a name (e.g. “Core identity”) and it's saved **for this connection**.
+- From then on, every lead-field picker has a **🏷 field-set dropdown**: pick
+  a set and its fields are ticked for you (you can still untick or add fields
+  before running). The request sent to Marketo is exactly the same as if you'd
+  ticked them by hand.
+- **Saved field sets** (home-page card, or search “field sets”) is the manage
+  page: see each set's fields, **rename**, **delete**, **↑/↓ reorder** them,
+  **⤓ Export JSON** to a `saved-field-sets.json` file, and **⤒ Import** it
+  again (file or pasted JSON) — that's how you copy sets between connections.
+  Any field in a set that isn't in the saved field library is flagged (“not in
+  library”; it would be sent to Marketo as-is).
+
+## Every screen has its own address (copy it, paste it, share it)
+
+The address bar always shows where you are in the app — so you can copy the
+address from the address bar and paste it anywhere (or send it to a colleague):
+
+| You are on… | The address ends with… |
+|---|---|
+| Home (task cards) | `/#/` |
+| The catalog browser | `/#/browse` (or `/#/browse/Leads` for one group) |
+| A call page, e.g. *Get Leads by Filter Type* | `/#/call/leads-get-by-filter` |
+| A bulk wizard, e.g. *Extract leads* | `/#/bulk/extract-leads` |
+| Lead field library · Saved field sets | `/#/fields` · `/#/fieldsets` |
+
+Pasting such an address opens that screen directly, and the browser's
+**Back / Forward** buttons work as usual. The address names a *screen*, not your
+data — a colleague pasting it sees the same screen on *their* own connection.
 
 ## Settings, export location & call logging
 

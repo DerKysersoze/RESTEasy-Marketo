@@ -113,6 +113,35 @@
     <div class="flds-list" id="flds-list"></div>
   </div>
 
+  <!-- ================= FIELD SETS — saved field sets (P12, mockup 11) ================= -->
+  <div id="view-fieldsets" class="view hidden">
+    <div class="pagehead">
+      <div>
+        <button id="fs-back" type="button" class="back">← Home</button>
+        <h1>Saved field sets</h1>
+        <p>Saved sets of lead fields for this connection. Any call with a field picker can load one — you can always add or remove fields after loading. Reorder them, or move them between connections with Export / Import.</p>
+      </div>
+      <div class="fs-head-actions">
+        <button id="fs-export" type="button" class="ghost small" title="Download all field sets for this connection as saved-field-sets.json">⤓ Export JSON</button>
+        <button id="fs-import" type="button" class="ghost small" title="Add field sets from an exported file or pasted JSON">⤒ Import…</button>
+        <span class="fs-io-status" id="fs-io-status"></span>
+      </div>
+    </div>
+    <div class="fs-import-pop hidden" id="fs-import-pop">
+      <div class="fs-io-row">
+        <input type="file" id="fs-import-file" accept=".json,application/json">
+        <span class="muted small">or paste the JSON below</span>
+      </div>
+      <textarea id="fs-import-text" rows="4" spellcheck="false" placeholder='{"sets":[{"name":"Core identity","fields":["new_lookupfieldid","email","firstName","lastName"]}]} — or a plain array of {name, fields} entries'></textarea>
+      <div class="fs-io-row">
+        <button id="fs-import-do" type="button" class="primary small">Import</button>
+        <button id="fs-import-cancel" type="button" class="ghost small">Cancel</button>
+        <span class="fs-io-inline" id="fs-import-status"></span>
+      </div>
+    </div>
+    <div class="fs-list" id="fs-list"></div>
+  </div>
+
   <!-- ================= DETAIL — call form left · response right (mockup 7) ================= -->
   <div id="view-detail" class="view hidden">
     <div class="main">

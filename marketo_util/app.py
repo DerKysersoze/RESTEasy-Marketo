@@ -221,6 +221,86 @@ def clear_fields(profile_id: int | None = None) -> JSONResponse:
     return JSONResponse({"ok": True, "cleared": lookups.clear(p)})
 
 
+# --- saved field sets (P12): named, per-connection field collections ----------
+class FieldSetIn(BaseModel):
+    name: str = ""
+    fields: list[str] = []
+
+
+class FieldSetPatchIn(BaseModel):
+    name: str | None = None
+    fields: list[str] | None = None
+    move: int | None = None  # -1 = up, 1 = down
+
+
+class FieldSetImportIn(BaseModel):
+    sets: list = []  # entries validated one-by-one in db.import_field_sets (invalid ones are counted, not rejected)
+
+
+def _profile_or_400(profile_id: int | None) -> config.Profile:
+    p = config.get_profile(profile_id) if profile_id else config.get_active()
+    if p is None:
+        raise HTTPException(400, "No Marketo connection configured — add one first.")
+    return p
+
+
+@app.get("/api/fieldsets")
+def list_field_sets(profile_id: int | None = None) -> JSONResponse:
+    """A connection's saved field sets, in the user's order."""
+    p = _profile_or_400(profile_id)
+    return JSONResponse({"sets": db.list_field_sets(p.id)})
+
+
+@app.post("/api/fieldsets")
+def create_field_set(body: FieldSetIn, profile_id: int | None = None) -> JSONResponse:
+    """Save the given fields under a name (400 on duplicate name / empty list)."""
+    p = _profile_or_400(profile_id)
+    try:
+        sid = db.create_field_set(p.id, body.name, body.fields)
+    except db.FieldSetError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return JSONResponse(db.get_field_set(p.id, sid))
+
+
+@app.patch("/api/fieldsets/{set_id}")
+def update_field_set(set_id: int, body: FieldSetPatchIn, profile_id: int | None = None) -> JSONResponse:
+    """Rename, replace fields, and/or move position (↑/↓). Send only what changed."""
+    p = _profile_or_400(profile_id)
+    if body.name is None and body.fields is None and body.move is None:
+        raise HTTPException(400, "Send at least one of: name, fields, move.")
+    try:
+        if body.name is not None:
+            db.rename_field_set(p.id, set_id, body.name)
+        if body.fields is not None:
+            db.replace_field_set_fields(p.id, set_id, body.fields)
+        if body.move is not None:
+            db.move_field_set(p.id, set_id, body.move)
+    except db.FieldSetNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except db.FieldSetError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return JSONResponse(db.get_field_set(p.id, set_id))
+
+
+@app.delete("/api/fieldsets/{set_id}")
+def delete_field_set(set_id: int, profile_id: int | None = None) -> JSONResponse:
+    p = _profile_or_400(profile_id)
+    if db.get_field_set(p.id, set_id) is None:
+        raise HTTPException(404, "No such field set for this connection.")
+    db.delete_field_set(p.id, set_id)
+    return JSONResponse({"ok": True})
+
+
+@app.post("/api/fieldsets/import")
+def import_field_sets(body: FieldSetImportIn, profile_id: int | None = None) -> JSONResponse:
+    """Bulk import {sets:[{name, fields}]}; adds new names, skips existing ones."""
+    p = _profile_or_400(profile_id)
+    try:
+        return JSONResponse(db.import_field_sets(p.id, body.sets))
+    except db.FieldSetError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
 # --- settings (P8): export location + call logging + bulk-file save ----------
 class SettingsIn(BaseModel):
     export_dir: str | None = None

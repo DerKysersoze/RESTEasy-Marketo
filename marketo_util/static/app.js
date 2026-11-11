@@ -53,16 +53,117 @@ async function loadCatalog() {
 
 function showView(name) {
   state.view = name;
-  for (const v of ["home", "browse", "fields", "detail"]) {
+  for (const v of ["home", "browse", "fields", "detail", "fieldsets"]) {
     document.getElementById("view-" + v).classList.toggle("hidden", v !== name);
   }
 }
+
+/* ================= URL routing (P13) =================
+   The address bar mirrors where you are in the app, so every screen has a
+   copy/paste-able address — e.g. …/#/call/leads.get_by_filter opens
+   “Get Leads by Filter Type” directly and its address can be shared.
+   Hash-based on purpose: no server changes, the browser's Back/Forward
+   buttons work, and it survives the app's single-page navigation:
+     #/                     home
+     #/browse[/<group>]     catalog browser (optionally one group)
+     #/browse[/<group>]?q=  …with a search filter
+     #/fields               lead field library
+     #/fieldsets            saved field sets
+     #/call/leads-get-by-filter   a call page (friendly slug — no dots)
+     #/bulk/extract-leads         a bulk wizard
+
+   UI navigation still calls the same go/select navigation functions as
+   before; they now also push their address. External address changes (Back/Forward, a
+   pasted link, typing a new address) arrive via “hashchange” → applyRoute. */
+
+function safeDecode(s) {
+  try { return decodeURIComponent(s); } catch { return s; }
+}
+
+function parseRoute(hash) {
+  let h = String(hash || "").replace(/^#\/?/, "");
+  let q = "";
+  const qi = h.indexOf("?");
+  if (qi >= 0) {
+    const qs = h.slice(qi + 1);
+    h = h.slice(0, qi);
+    if (qs.startsWith("q=")) q = safeDecode(qs.slice(2));
+  }
+  const seg = h.split("/").filter(Boolean);
+  return { head: seg[0] || "", rest: seg.slice(1), q };
+}
+
+/* Friendly slugs (P13a): dots and underscores become dashes, so the bar
+   never shows e.g. leads.get_by_filter — it shows leads-get-by-filter. */
+function slugifyId(id) {
+  return String(id).replace(/[._]/g, "-");
+}
+
+function browseHash() {
+  const g = state.browse.group && state.browse.group !== "__all"
+    ? "/" + encodeURIComponent(state.browse.group) : "";
+  const q = (state.browse.q || "").trim()
+    ? "?q=" + encodeURIComponent(state.browse.q.trim()) : "";
+  return "#/browse" + g + q;
+}
+
+let routeSelfNav = false;
+function pushRoute(hash) {
+  if (location.hash === hash) return; // same screen — no duplicate history entry
+  routeSelfNav = true;
+  location.hash = hash; // fires "hashchange"; the flag stops it re-rendering
+}
+
+/* Same address, no new history entry — keeps the bar current while typing. */
+function replaceRoute(hash) {
+  if (location.hash === hash) return;
+  try { history.replaceState(null, "", hash); } catch { /* cosmetic */ }
+}
+
+function applyRoute(p) {
+  if (!p.head) { goHome(); return; }
+  if (p.head === "fields") { goFields(); return; }
+  if (p.head === "fieldsets") { goFieldSets(); return; }
+  if (p.head === "browse") {
+    let g = p.rest.map(safeDecode).join("/") || "__all";
+    const known = state.catalog.groups.map((x) => x.group)
+      .concat(["Bulk Extract", "Bulk Import"]);
+    if (g !== "__all" && !known.includes(g)) g = "__all";
+    state.browse.group = g;
+    state.browse.q = p.q || "";
+    const bs = document.getElementById("browse-search");
+    if (bs && bs.value !== (p.q || "")) bs.value = p.q || "";
+    goBrowse();
+    return;
+  }
+  if (p.head === "call" && p.rest.length) {
+    const slug = p.rest.map(safeDecode).join("/");
+    const c = allCalls().find((x) => slugifyId(x.id) === slug)
+      || allCalls().find((x) => x.id === slug); // old dotted form still resolves
+    if (c) { selectCall(c, state.backTo); return; }
+  }
+  if (p.head === "bulk" && p.rest.length) {
+    const slug = p.rest.map(safeDecode).join("/");
+    const o = (state.bulk.ops || []).find((x) => {
+      const s = slugifyId(x.id).replace(/^bulk-/, "");
+      return s === slug || slugifyId(x.id) === slug || x.id === slug;
+    });
+    if (o) { selectBulkOp(o, state.backTo); return; }
+  }
+  goHome(); // unknown address → home, no scary error
+}
+
+window.addEventListener("hashchange", () => {
+  if (routeSelfNav) { routeSelfNav = false; return; }
+  applyRoute(parseRoute(location.hash));
+});
 
 function goHome() {
   state.backTo = "home";
   showView("home");
   renderHome();
   document.getElementById("view-home").scrollTo({ top: 0 });
+  pushRoute("#/");
 }
 
 function goBrowse(group) {
@@ -71,6 +172,7 @@ function goBrowse(group) {
   showView("browse");
   renderBrowse();
   document.getElementById("view-browse").scrollTo({ top: 0 });
+  pushRoute(browseHash());
 }
 
 /* ---- task definitions (call ids resolved against the live catalog) ---- */
@@ -116,26 +218,39 @@ const FIELD_LIBRARY_ENTRY = {
   view: "fields",
 };
 
+/* P12 — saved field sets: named, per-connection collections of lead fields.
+   Like the field library, this is a first-class home-search entry (it opens a
+   view, not a call — so it needs no catalog entry behind it). */
+const FIELD_SETS_ENTRY = {
+  id: "__field_sets",
+  name: "Saved field sets — save a field selection once, load it into any picker",
+  group: "Field sets",
+  view: "fieldsets",
+};
+
 /* Home search space: the field library, catalog calls, PLUS the bulk wizards
    (P9 — bulk ops were previously invisible to the home search box, so e.g.
    “extract leads” died). */
 function searchPool() {
-  return [FIELD_LIBRARY_ENTRY].concat(allCalls()).concat(state.bulk.ops || []);
+  return [FIELD_LIBRARY_ENTRY, FIELD_SETS_ENTRY].concat(allCalls()).concat(state.bulk.ops || []);
 }
 
 function resolveCall(id) {
   if (id === FIELD_LIBRARY_ENTRY.id) return FIELD_LIBRARY_ENTRY;
+  if (id === FIELD_SETS_ENTRY.id) return FIELD_SETS_ENTRY;
   return allCalls().find((c) => c.id === id) || state.bulk.ops.find((o) => o.id === id) || null;
 }
 
 function openEntry(entry, from) {
   if (entry.view === "fields") { goFields(); return; }
+  if (entry.view === "fieldsets") { goFieldSets(); return; }
   if (entry.method) selectCall(entry, from);
   else selectBulkOp(entry, from);
 }
 
 function badgeFor(entry) {
   if (entry.view === "fields") return { txt: "LIB", cls: "m-get" };
+  if (entry.view === "fieldsets") return { txt: "SETS", cls: "m-get" };
   if (entry.method) return { txt: entry.method, cls: entry.method === "GET" ? "m-get" : "m-post" };
   return entry.kind === "extract" ? { txt: "BULK", cls: "m-get" } : { txt: "BULK", cls: "m-post" };
 }
@@ -157,10 +272,12 @@ function renderHome() {
     <div class="fld-actions">
       <button type="button" class="primary" id="fld-refresh">↻ Refresh field list</button>
       <button type="button" class="ghost" id="fld-view">View all fields →</button>
+      <button type="button" class="ghost small fld-setsbtn" id="fld-sets" title="Save a field selection once, then load it into any call's field picker">🏷 Saved field sets (…)</button>
       <button type="button" class="ghost small" id="fld-clear" hidden>Clear</button>
     </div>`;
   fld.querySelector("#fld-refresh").addEventListener("click", () => refreshFieldList(fld));
   fld.querySelector("#fld-view").addEventListener("click", () => goFields());
+  fld.querySelector("#fld-sets").addEventListener("click", goFieldSets);
   fld.querySelector("#fld-clear").addEventListener("click", async () => {
     if (!confirm("Clear the stored field list? Pickers will re-load it on next use — or click Refresh.")) return;
     try {
@@ -228,6 +345,7 @@ function showFieldError(card, msg) {
 
 async function loadFieldCard(card) {
   const stats = card.querySelector("#fld-stats");
+  const setsBtn = card.querySelector("#fld-sets");
   try {
     const data = await req("GET", "/api/fields");
     const st = data.stats;
@@ -237,6 +355,13 @@ async function loadFieldCard(card) {
     card.querySelector("#fld-clear").hidden = st.count === 0;
   } catch (e) {
     stats.innerHTML = `<span class="muted">${esc(e.message)}</span>`;
+  }
+  // P12 — saved field sets count (independent of whether the library is loaded).
+  if (setsBtn) {
+    try {
+      const d = await req("GET", "/api/fieldsets");
+      setsBtn.textContent = `🏷 Saved field sets (${(d.sets || []).length})`;
+    } catch { setsBtn.hidden = true; } // no connection → manage view would error
   }
 }
 
@@ -268,6 +393,7 @@ function goFields() {
   showView("fields");
   renderFieldsView();
   document.getElementById("view-fields").scrollTo({ top: 0 });
+  pushRoute("#/fields");
 }
 
 async function renderFieldsView() {
@@ -332,7 +458,7 @@ function renderFldsRows() {
   for (const f of sortFieldOptions(fldsState.fields)) {
     const tagOf = f.isCustom === true ? "custom" : f.isCustom === false ? "system" : "untagged";
     if (fldsState.tag !== "all" && tagOf !== fldsState.tag) continue;
-    const hay = `${f.label} ${f.name} ${f.dataType || ""} ${f.description || ""}`.toLowerCase();
+    const hay = `${f.label} ${f.name} ${f.dataType || ""} ${fieldTypeLabel(f.dataType)} ${f.description || ""}`.toLowerCase();
     if (q && !hay.includes(q)) continue;
     rows.push(f);
   }
@@ -350,15 +476,25 @@ function renderFldsRows() {
   for (const f of rows) {
     const row = document.createElement("div");
     row.className = "flds-row";
+    const type = fieldTypeLabel(f.dataType);
+    const kind =
+      f.isCustom === true
+        ? '<span class="tagc custom">Custom</span>'
+        : f.isCustom === false
+          ? '<span class="tagc system">System</span>'
+          : '<span class="tagc unknown">Unknown</span>';
     row.innerHTML = `
-      <span class="flds-key">Name</span>
-      <span class="flds-label">${esc(f.label)}</span>
-      <span class="flds-key">API</span>
-      <code class="flds-api">${esc(f.name)}</code>
-      ${f.dataType ? `<span class="flds-dt">${esc(f.dataType)}</span>` : ""}
-      <span class="flds-badges">${fieldBadgesHtml(f)}</span>
-      <button type="button" class="ghost small flds-copy" title="Copy the API name to paste into a call">Copy</button>
-      ${f.description ? `<div class="flds-desc">${esc(f.description)}</div>` : ""}`;
+      <div class="flds-attr">
+        <span class="flds-k">Display name</span>
+        <span class="flds-v name">${esc(f.label)}</span>
+        <span class="flds-side">
+          ${kind}
+          ${f.readOnly ? '<span class="tagc ro">Read-only</span>' : ""}
+          <button type="button" class="ghost small flds-copy" title="Copy the API name to paste into a call">Copy</button>
+        </span>
+      </div>
+      <div class="flds-attr"><span class="flds-k">API name</span><span class="flds-v api">${esc(f.name)}</span></div>
+      ${type ? `<div class="flds-attr"><span class="flds-k">Type</span><span class="flds-v type">${esc(type)}</span></div>` : ""}`;
     row.querySelector(".flds-copy").addEventListener("click", (e) => copyText(f.name, e.currentTarget));
     card.appendChild(row);
   }
@@ -391,10 +527,10 @@ function csvCell(v) {
 
 function fieldsToCsv(fields) {
   const tri = (v) => (v === true ? "yes" : v === false ? "no" : "unknown");
-  const lines = ["api_name,display_name,data_type,custom,read_only,hidden,sensitive,description"];
+  const lines = ["api_name,display_name,type,data_type,custom,read_only,hidden,sensitive,description"];
   for (const f of fields) {
     lines.push([
-      f.name, f.label, f.dataType || "",
+      f.name, f.label, fieldTypeLabel(f.dataType), f.dataType || "",
       tri(f.isCustom), tri(f.readOnly), tri(f.isHidden), tri(f.isSensitive),
       f.description || "",
     ].map(csvCell).join(","));
@@ -433,6 +569,219 @@ function copyText(text, btn) {
     try { done = document.execCommand("copy"); } catch { done = false; }
     ta.remove();
     done ? ok() : fail();
+  }
+}
+
+/* ---- P12: saved field sets — manage view (mockup 11, approved 2026-11-11) ----
+   Cards with rename / delete / ↑↓ reorder; Export JSON (client-side download);
+   Import (file or pasted JSON → POST /api/fieldsets/import). No Marketo calls
+   anywhere — sets are local data, per connection. */
+
+const fsState = { sets: [], library: null }; // library = Set of stored field names (null = unknown)
+
+function goFieldSets() {
+  state.backTo = "home";
+  showView("fieldsets");
+  renderFieldSetsView();
+  document.getElementById("view-fieldsets").scrollTo({ top: 0 });
+  pushRoute("#/fieldsets");
+}
+
+function fsChip(name, library) {
+  const missing = library ? !library.has(name) : false;
+  return `<span class="fs-chip${missing ? " missing" : ""}">${esc(name)}${missing ? '<span class="fs-chip-tag">not in library</span>' : ""}</span>`;
+}
+
+async function renderFieldSetsView() {
+  const listEl = $("#fs-list");
+  listEl.innerHTML = '<div class="empty">Loading saved field sets…</div>';
+  let sets = [];
+  let fldData = null;
+  try {
+    const results = await Promise.all([
+      req("GET", "/api/fieldsets"),
+      req("GET", "/api/fields").catch(() => null), // library is optional context ("not in library" chips)
+    ]);
+    sets = (results[0] && results[0].sets) || [];
+    fldData = results[1];
+  } catch (e) {
+    listEl.innerHTML = `
+      <div class="empty">
+        <div class="fs-empty-title">Couldn't load saved field sets</div>
+        <div>${esc(e.message)}</div>
+        <button type="button" class="primary fs-retry" style="margin-top:12px">↻ Try again</button>
+      </div>`;
+    listEl.querySelector(".fs-retry").addEventListener("click", renderFieldSetsView);
+    return;
+  }
+  fsState.sets = sets;
+  fsState.library =
+    fldData && fldData.stats && fldData.stats.count > 0
+      ? new Set((fldData.fields || []).map((f) => f.name))
+      : null;
+  renderFsCards();
+}
+
+function renderFsCards() {
+  const listEl = $("#fs-list");
+  const sets = fsState.sets;
+  const plural = (n) => (n === 1 ? "" : "s");
+
+  if (!sets.length) {
+    listEl.innerHTML = `
+      <div class="fs-empty">
+        <div class="fs-empty-ic">🏷</div>
+        <div class="fs-empty-title">No saved field sets yet for this connection</div>
+        <div>Tick the fields you want in any call's field picker, then click <b>💾 Save as field set…</b> and give it a name — or bring some over with <b>⤒ Import</b> above.</div>
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = "";
+  sets.forEach((s, i) => {
+    const library = fsState.library;
+    const missing = library ? s.fields.filter((n) => !library.has(n)) : [];
+    const card = document.createElement("div");
+    card.className = "fs-card";
+    card.innerHTML = `
+      <div class="fs-card-top">
+        <span class="fs-name">${esc(s.name)}</span>
+        <span class="fs-count">${s.fields.length} field${plural(s.fields.length)}</span>
+        <span class="fs-meta">saved ${esc(fmtAgo(s.createdAt))}</span>
+        <span class="fs-actions">
+          <button type="button" class="ghost small fs-up" title="Move up" ${i === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="ghost small fs-dn" title="Move down" ${i === sets.length - 1 ? "disabled" : ""}>↓</button>
+          <button type="button" class="ghost small fs-rename">Rename</button>
+          <button type="button" class="ghost small fs-del">Delete</button>
+        </span>
+        <span class="fs-renamerow hidden">
+          <input type="text" class="fs-rn-input" maxlength="60" value="${esc(s.name)}" autocomplete="off">
+          <button type="button" class="primary small fs-rn-save">Save</button>
+          <button type="button" class="ghost small fs-rn-cancel">Cancel</button>
+        </span>
+      </div>
+      <div class="fs-chips">${s.fields.map((n) => fsChip(n, library)).join("")}</div>
+      ${missing.length
+        ? `<div class="fs-warnline">⚠ <span>${missing.length} field${plural(missing.length)} not in this connection's saved library (sent as-is if used): <code>${missing.map(esc).join("</code>, <code>")}</code></span></div>`
+        : ""}
+      <div class="fs-where"><span class="fs-where-label">Works on</span> every call with a lead-field picker — Get Lead by ID · Get Leads by Filter Type · Get Leads in List · Get Leads by Program · Get Lead Changes · Bulk extract (leads) · Sync Leads (columns) · Push to Program (columns)</div>
+    `;
+
+    const afterChange = async (fn) => {
+      fsStore.invalidate();
+      try { await fn(); await renderFieldSetsView(); }
+      catch (e) { alert(e.message); }
+    };
+
+    /* reorder (↑/↓) */
+    card.querySelector(".fs-up").addEventListener("click", () => afterChange(() => req("PATCH", `/api/fieldsets/${s.id}`, { move: -1 })));
+    card.querySelector(".fs-dn").addEventListener("click", () => afterChange(() => req("PATCH", `/api/fieldsets/${s.id}`, { move: 1 })));
+
+    /* rename (inline) */
+    const rnRow = card.querySelector(".fs-renamerow");
+    const rnInput = card.querySelector(".fs-rn-input");
+    const cancelRename = () => {
+      rnRow.classList.add("hidden");
+      card.querySelector(".fs-actions").style.display = "";
+      rnInput.value = s.name;
+    };
+    const commitRename = () => {
+      const name = rnInput.value.trim();
+      if (!name || name.toLowerCase() === s.name.toLowerCase()) { cancelRename(); return; }
+      afterChange(() => req("PATCH", `/api/fieldsets/${s.id}`, { name }));
+    };
+    card.querySelector(".fs-rename").addEventListener("click", () => {
+      card.querySelector(".fs-actions").style.display = "none";
+      rnRow.classList.remove("hidden");
+      rnInput.focus();
+      rnInput.select();
+    });
+    card.querySelector(".fs-rn-save").addEventListener("click", commitRename);
+    card.querySelector(".fs-rn-cancel").addEventListener("click", cancelRename);
+    rnInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); commitRename(); }
+      else if (e.key === "Escape") cancelRename();
+    });
+
+    /* delete */
+    card.querySelector(".fs-del").addEventListener("click", () => {
+      if (!confirm(`Delete field set “${s.name}” (${s.fields.length} field${plural(s.fields.length)})? Calls that used it keep working — the fields just won't be pre-ticked.`)) return;
+      afterChange(() => req("DELETE", `/api/fieldsets/${s.id}`));
+    });
+
+    listEl.appendChild(card);
+  });
+}
+
+/* ---- P12: export / import (manage view header) ---- */
+
+function fsFlashIO(kind, msg) {
+  const el = $("#fs-io-status");
+  el.className = "fs-io-status " + kind;
+  el.textContent = msg;
+}
+
+function exportFieldSets() {
+  if (!fsState.sets.length) {
+    fsFlashIO("err", "Nothing to export yet — save a field set first (💾 in any picker).");
+    return;
+  }
+  const payload = {
+    app: "RESTEasy-Marketo",
+    kind: "saved-field-sets",
+    exportedAt: new Date().toISOString(),
+    sets: fsState.sets.map((s) => ({ name: s.name, fields: [...s.fields] })),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "saved-field-sets.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  const n = fsState.sets.length;
+  fsFlashIO("ok", `Exported ${n} field set${n === 1 ? "" : "s"} → saved-field-sets.json. Import it on another connection to copy them over.`);
+}
+
+function toggleFsImport() {
+  const pop = $("#fs-import-pop");
+  const open = pop.classList.toggle("hidden");
+  if (open) { // closed
+    $("#fs-import-status").textContent = "";
+    $("#fs-import-status").className = "fs-io-inline";
+  } else {
+    $("#fs-import-status").textContent = "";
+    $("#fs-import-status").className = "fs-io-inline";
+    $("#fs-import-text").focus();
+  }
+}
+
+async function doFsImport() {
+  const raw = $("#fs-import-text").value.trim();
+  const stEl = $("#fs-import-status");
+  const setSt = (kind, msg) => { stEl.className = "fs-io-inline " + kind; stEl.textContent = msg; };
+  if (!raw) { setSt("err", "Pick a file or paste the exported JSON first."); return; }
+  let data;
+  try { data = JSON.parse(raw); }
+  catch { setSt("err", "That's not valid JSON — check the text (or pick the file) and try again."); return; }
+  // Accept both shapes: a plain array, or the exported object with a "sets" array.
+  const arr = Array.isArray(data) ? data : (data && Array.isArray(data.sets)) ? data.sets : null;
+  if (!arr) { setSt("err", "No field sets found — use a plain array of {name, fields} or an object with a \"sets\" array."); return; }
+  try {
+    const r = await req("POST", "/api/fieldsets/import", { sets: arr });
+    let report = `Added ${r.added}, skipped ${r.skipped}`;
+    if (r.skipped) report += " (name already exists)";
+    if (r.invalid) report += `, ignored ${r.invalid} invalid entr${r.invalid === 1 ? "y" : "ies"}`;
+    setSt(r.added || r.invalid ? (r.added ? "ok" : "err") : "ok", report + ".");
+    fsFlashIO("ok", `Import done — ${report}.`);
+    $("#fs-import-text").value = "";
+    $("#fs-import-file").value = "";
+    fsStore.invalidate();
+    await renderFieldSetsView();
+  } catch (e) {
+    setSt("err", e.message);
   }
 }
 
@@ -619,6 +968,7 @@ function selectCall(call, from) {
   renderDetail(call);
   showView("detail");
   document.getElementById("view-detail").scrollTo({ top: 0 });
+  pushRoute("#/call/" + slugifyId(call.id));
 }
 
 /* ================= detail + form ================= */
@@ -725,6 +1075,29 @@ function fieldBadgesHtml(f) {
   return h;
 }
 
+/* Marketo's own field-type names (Custom Field Type Glossary + the REST
+   Field Types page). Stored values are Marketo's raw dataType words
+   (string, float, reference, …); this maps them to the label Marketo itself
+   uses. Unknown values are shown as-is, never hidden. */
+const FIELD_TYPES = {
+  string: "String", text: "Text Area", email: "Email", date: "Date", datetime: "Datetime",
+  time: "Time", duration: "Duration", phone: "Phone", url: "URL", link: "Link",
+  currency: "Currency", percent: "Percent", score: "Score", boolean: "Boolean",
+  integer: "Integer", float: "Float", formula: "Formula", reference: "Reference",
+  choice: "Choice", category: "Category", lookup: "Lookup", lead_function: "Lead Function",
+  /* legacy numeric codes (older instances / other endpoints) */
+  "1": "Text Area", "2": "Date", "3": "Number", "4": "Phone", "5": "Choice", "6": "Boolean",
+  "7": "Formula", "8": "Category", "9": "Time", "10": "Duration", "11": "Time & Duration",
+  "12": "Email", "13": "URL", "14": "Link", "15": "Choice List", "16": "Address", "17": "File",
+};
+function fieldTypeLabel(dt) {
+  if (dt === null || dt === undefined || dt === "") return "";
+  const k = String(dt).trim().toLowerCase();
+  if (FIELD_TYPES[k]) return FIELD_TYPES[k];
+  if (FIELD_TYPES[dt]) return FIELD_TYPES[dt];
+  return String(dt);
+}
+
 const FIELD_SORT_KEY = "marketo.fieldSort";
 
 function savedFieldSort() {
@@ -748,14 +1121,48 @@ function sortFieldOptions(fields, mode) {
   return [...fields].sort((a, b) => rank(a) - rank(b) || alpha(a, b));
 }
 
+/* ---- P12: saved field sets — shared list cache (picker dropdowns + manage view) ---- */
+const fsStore = {
+  data: null,
+  promise: null,
+  list() {
+    if (this.promise) return this.promise;
+    this.promise = req("GET", "/api/fieldsets")
+      .then((d) => { this.data = d.sets || []; return this.data; })
+      .catch((e) => { this.promise = null; throw e; });
+    return this.promise;
+  },
+  invalidate() { this.promise = null; this.data = null; },
+};
+
 function renderTaggedPicker(el, fields, opts = {}) {
-  // opts: { disabled:Set, initial:Set, countLabel:"selected"|"columns", onChecked:(values)=>void }
+  // opts: { disabled:Set, initial:Set, countLabel:"selected"|"columns", onChecked:(values)=>void,
+  //         fieldSets:bool }   (P12: saved field sets — lead-field pickers only)
   const disabled = opts.disabled || new Set();
   const initial = opts.initial || new Set();
   let tagFilter = "all";
+  const setsControls = opts.fieldSets
+    ? `
+      <select class="lk-sets" title="Load a saved field set — ticks its fields for you" aria-label="Field set"></select>
+      <button type="button" class="ghost small lk-savebtn" title="Save the fields currently ticked as a named field set">💾 Save as field set…</button>`
+    : "";
+  const setsPanels = opts.fieldSets
+    ? `
+    <div class="lk-note" role="status"></div>
+    <div class="lk-save-pop hidden">
+      <div class="lk-sp-row">
+        <input type="text" class="lk-sp-name" placeholder="Field set name — e.g. \u201CSupport ticket\u201D" maxlength="60" autocomplete="off">
+        <button type="button" class="primary small lk-sp-save">Save</button>
+        <button type="button" class="ghost small lk-sp-cancel">Cancel</button>
+      </div>
+      <div class="lk-sp-hint"></div>
+      <div class="lk-sp-status" role="status"></div>
+    </div>`
+    : "";
   el.innerHTML = `
     <div class="lk-bar">
       <input type="search" class="lk-search" placeholder="Filter fields…" autocomplete="off">
+      ${setsControls}
       <span class="seg lk-seg" role="group" aria-label="Field type filter">
         <button type="button" class="on" data-f="all">All</button>
         <button type="button" data-f="custom">Custom only</button>
@@ -770,6 +1177,7 @@ function renderTaggedPicker(el, fields, opts = {}) {
       <button type="button" class="ghost small lk-clear">Clear</button>
       <span class="muted lk-count"></span>
     </div>
+    ${setsPanels}
     <div class="lk-list"></div>`;
   const list = el.querySelector(".lk-list");
   const rowByName = new Map();
@@ -786,7 +1194,8 @@ function renderTaggedPicker(el, fields, opts = {}) {
     row.appendChild(cb);
     const span = document.createElement("span");
     span.className = "lk-name";
-    span.textContent = f.label + (disabled.has(f.name) ? " *" : f.dataType ? `  (${f.dataType})` : "");
+    const type = fieldTypeLabel(f.dataType);
+    span.textContent = f.label + (disabled.has(f.name) ? " *" : type ? `  (${type})` : "");
     row.appendChild(span);
     const badgesHtml = fieldBadgesHtml(f);
     if (badgesHtml) {
@@ -846,11 +1255,137 @@ function renderTaggedPicker(el, fields, opts = {}) {
     for (const cb of $$("input[type=checkbox]", el)) if (!cb.disabled) cb.checked = false;
     update();
   });
+
+  /* P12 — saved field sets (mockup 11). Applying a set is client-side only —
+     the Marketo request is byte-identical to ticking the fields by hand. */
+  if (opts.fieldSets) {
+    const setsSel = el.querySelector(".lk-sets");
+    const saveBtn = el.querySelector(".lk-savebtn");
+    const noteEl = el.querySelector(".lk-note");
+    const popEl = el.querySelector(".lk-save-pop");
+    const spName = el.querySelector(".lk-sp-name");
+    const spHint = el.querySelector(".lk-sp-hint");
+    const spStatus = el.querySelector(".lk-sp-status");
+    const pickerNames = new Set(fields.map((f) => f.name));
+    const plural = (n) => (n === 1 ? "" : "s");
+
+    const showNote = (kind, html) => {
+      noteEl.className = "lk-note show " + kind;
+      noteEl.innerHTML = `<span class="lk-note-ico">${kind === "ok" ? "✓" : "⚠"}</span><span>${html}</span>`;
+    };
+    const hideNote = () => { noteEl.className = "lk-note"; noteEl.innerHTML = ""; };
+
+    const renderSetOptions = (selectedId) => {
+      let html = '<option value="">— No field set —</option>';
+      for (const s of fsStore.data || []) {
+        html += `<option value="${esc(s.id)}">${esc(s.name)} (${s.fields.length})</option>`;
+      }
+      html += '<option value="__manage" class="lk-sets-mgmt">Manage saved field sets…</option>';
+      setsSel.innerHTML = html;
+      const want = selectedId != null ? String(selectedId) : "";
+      setsSel.value = [...setsSel.options].some((o) => o.value === want && want !== "__manage") ? want : "";
+    };
+
+    const applySet = (id) => {
+      const s = (fsStore.data || []).find((x) => String(x.id) === String(id));
+      if (!s) { hideNote(); return; }
+      const ticked = [];
+      for (const r of rowByName.values()) {
+        const cb = r.querySelector("input");
+        if (cb.disabled) continue;
+        cb.checked = s.fields.includes(cb.value);
+        if (cb.checked) ticked.push(cb.value);
+      }
+      const missing = s.fields.filter((n) => !pickerNames.has(n));
+      if (missing.length) {
+        showNote("warn",
+          `Applied field set <b>“${esc(s.name)}”</b> — ${ticked.length} field${plural(ticked.length)} ticked. ` +
+          `${missing.length} field${plural(missing.length)} in this set isn't in this picker's list (sent as-is if used): ` +
+          `<code>${missing.map(esc).join("</code>, <code>")}</code>.`);
+      } else {
+        showNote("ok",
+          `Applied field set <b>“${esc(s.name)}”</b> — ${ticked.length} field${plural(ticked.length)} ticked. ` +
+          `Untick or add fields before running if you need a different mix.`);
+      }
+      update();
+    };
+
+    fsStore.list()
+      .then(() => renderSetOptions())
+      .catch(() => {
+        setsSel.disabled = true;
+        setsSel.title = "Couldn't load saved field sets for this connection";
+      });
+
+    setsSel.addEventListener("change", () => {
+      if (setsSel.value === "__manage") {
+        setsSel.value = "";
+        goFieldSets();
+        return;
+      }
+      if (setsSel.value) applySet(setsSel.value);
+      else hideNote();
+    });
+
+    const checkedNow = () => $$("input[type=checkbox]:checked", el).map((c) => c.value);
+    const openSave = () => {
+      const n = checkedNow().length;
+      spStatus.textContent = "";
+      spStatus.className = "lk-sp-status";
+      spName.value = "";
+      spHint.innerHTML = n
+        ? `Saves the <b>${n} field${n === 1 ? "" : "s"} currently ticked</b> as a new field set for this connection.`
+        : "Tick at least one field first, then click <b>Save</b>.";
+      popEl.classList.remove("hidden");
+      spName.focus();
+    };
+    const closeSave = () => {
+      popEl.classList.add("hidden");
+      spStatus.textContent = "";
+    };
+    const doSave = async () => {
+      const picked = checkedNow();
+      const name = spName.value.trim();
+      if (!picked.length) { spStatus.textContent = "Tick at least one field first."; spStatus.className = "lk-sp-status err"; return; }
+      if (!name) { spStatus.textContent = "Give the field set a name."; spStatus.className = "lk-sp-status err"; return; }
+      spStatus.textContent = "Saving…";
+      spStatus.className = "lk-sp-status";
+      try {
+        const created = await req("POST", "/api/fieldsets", { name, fields: picked });
+        fsStore.invalidate();
+        await fsStore.list();
+        renderSetOptions(created && created.id);
+        spStatus.textContent = `Saved “${name}” (${picked.length} field${picked.length === 1 ? "" : "s"}) — it now appears in every field picker for this connection.`;
+        spStatus.className = "lk-sp-status ok";
+        setTimeout(closeSave, 1800);
+      } catch (e) {
+        spStatus.textContent = e.message;
+        spStatus.className = "lk-sp-status err";
+      }
+    };
+    saveBtn.addEventListener("click", openSave);
+    el.querySelector(".lk-sp-save").addEventListener("click", doSave);
+    el.querySelector(".lk-sp-cancel").addEventListener("click", closeSave);
+    spName.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); doSave(); }
+      else if (e.key === "Escape") closeSave();
+    });
+
+    // Manual selection changes dismiss the stale "applied set" note.
+    el.querySelector(".lk-clear").addEventListener("click", () => {
+      hideNote();
+      if (setsSel.value && setsSel.value !== "__manage") setsSel.value = "";
+    });
+    el.querySelector(".lk-all").addEventListener("click", hideNote);
+  }
+
   update();
 }
 
 function renderLookupPicker(el, fields) {
-  renderTaggedPicker(el, fields, {});
+  // P12 — field sets on lead-field pickers only; the activityTypes picker
+  // (bulk.extract_activities) is excluded per mockup 11.
+  renderTaggedPicker(el, fields, { fieldSets: (el.dataset.source || "describe") === "describe" });
 }
 
 function bodySectionHtml(body) {
@@ -1150,6 +1685,7 @@ function initSyncGrid(wrap, spec) {
         disabled: reqFields,
         initial: reqFields,
         countLabel: "columns",
+        fieldSets: source === "describe",
         onChecked: (checked) => {
           const next = [...reqFields, ...checked.filter((c) => !reqFields.has(c))];
           if (next.length !== cols.length || next.some((c, i) => cols[i] !== c)) {
@@ -1517,6 +2053,7 @@ function selectBulkOp(op, from) {
   showView("detail");
   document.getElementById("view-detail").scrollTo({ top: 0 });
   refreshJobHistory();
+  pushRoute("#/bulk/" + slugifyId(op.id).replace(/^bulk-/, ""));
 }
 
 function renderWizSteps(stage) {
@@ -2110,10 +2647,11 @@ function bindStatic() {
   $("#browse-search").addEventListener("input", (e) => {
     state.browse.q = e.target.value;
     renderBrowseGrid();
+    replaceRoute(browseHash()); // P13: keep the bar current (no history entry per keystroke)
   });
   $("#browse-tabs").addEventListener("click", (e) => {
     const t = e.target.closest(".tab");
-    if (t) { state.browse.group = t.dataset.g; renderBrowse(); }
+    if (t) { state.browse.group = t.dataset.g; renderBrowse(); pushRoute(browseHash()); }
   });
   $("#btn-browse").addEventListener("click", () => goBrowse());
   // P7b — field library view (static elements in index.html; bind once).
@@ -2130,6 +2668,19 @@ function bindStatic() {
     fldsState.tag = b.dataset.f;
     $$(".flds-seg button").forEach((x) => x.classList.toggle("on", x === b));
     renderFldsRows();
+  });
+  // P12 — saved field sets manage view (static elements in index.html; bind once).
+  $("#fs-back").addEventListener("click", goHome);
+  $("#fs-export").addEventListener("click", exportFieldSets);
+  $("#fs-import").addEventListener("click", toggleFsImport);
+  $("#fs-import-do").addEventListener("click", doFsImport);
+  $("#fs-import-cancel").addEventListener("click", toggleFsImport);
+  $("#fs-import-file").addEventListener("change", () => {
+    const f = $("#fs-import-file").files && $("#fs-import-file").files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { $("#fs-import-text").value = String(r.result || ""); };
+    r.readAsText(f);
   });
   // Persistent back-to-main-menu: visible on every view (home/browse/detail/bulk wizard).
   $("#btn-home").addEventListener("click", () => goHome());
@@ -2168,7 +2719,9 @@ async function init() {
   await loadCatalog();
   await loadBulkOps();
   await loadRecent();
-  goHome();
+  // P13 — open the address already in the bar (default #/ = home), so a
+  // pasted link (e.g. #/call/leads.get_by_filter) lands on that screen.
+  applyRoute(parseRoute(location.hash));
 }
 
 init().catch((e) => {

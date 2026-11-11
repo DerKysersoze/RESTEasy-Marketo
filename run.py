@@ -8,7 +8,60 @@ Env:    MARKETO_UTIL_HOST (default 127.0.0.1)
         MARKETO_UTIL_NO_TRAY=1 to skip the system-tray icon (headless/CI)
 """
 import os
+import subprocess
 import sys
+
+
+def _venv_python_path():
+    """Path to the app's own Python (`.venv`), relative to run.py — works from any folder."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    if os.name == "nt":
+        cand = os.path.join(root, ".venv", "Scripts", "python.exe")
+    else:
+        cand = os.path.join(root, ".venv", "bin", "python")
+    return cand if os.path.exists(cand) else None
+
+
+def _ensure_deps():
+    """The app runs inside its own Python environment (`.venv`).
+
+    If it was started with a different Python (e.g. the system `python`),
+    re-start under the bundled one so a plain `python run.py` still works.
+    """
+    try:
+        import uvicorn  # noqa: F401
+        import keyring  # noqa: F401
+        return
+    except ImportError:
+        pass
+
+    if os.environ.get("_MARKETO_UTIL_VENV_RETRY") == "1":
+        # Already inside the bundled Python and still missing packages → real problem.
+        pip_fix = (r".venv\Scripts\python.exe -m pip install -r requirements.txt"
+                   if os.name == "nt" else ".venv/bin/python -m pip install -r requirements.txt")
+        print("This app couldn't start: its Python environment is missing required packages.\n"
+              "If you installed it from source, reinstall them with:\n    " + pip_fix)
+        sys.exit(1)
+
+    venv_python = _venv_python_path()
+    if venv_python is None:
+        setup = ("    python -m venv .venv\n"
+                 + r"    .venv\Scripts\python.exe -m pip install -r requirements.txt"
+                 if os.name == "nt" else
+                 "    python3 -m venv .venv\n"
+                 + "    .venv/bin/python -m pip install -r requirements.txt")
+        print("This app needs its own Python environment, but no `.venv` folder was found\n"
+              "next to run.py. If you installed it from source, create one with:\n" + setup)
+        sys.exit(1)
+
+    os.environ["_MARKETO_UTIL_VENV_RETRY"] = "1"
+    print("Switching to the app's own Python environment...")
+    code = subprocess.run([venv_python, os.path.abspath(__file__)] + sys.argv[1:]).returncode
+    sys.exit(code)
+
+
+_ensure_deps()
+
 import threading
 import webbrowser
 
